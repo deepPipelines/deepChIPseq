@@ -1,0 +1,7 @@
+bamfile:
+        class: File
+        path: test.bam
+format: "bam"
+output_filename: "DEEPID.tmp.filt.bam"
+filter: "not (duplicate or unmapped or failed_quality_control or supplementary or secondary_alignment) and mapping_quality >= 5"
+
