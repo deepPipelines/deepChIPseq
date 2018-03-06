@@ -31,13 +31,13 @@ inputs:
   inputFile:
     type: File
     inputBinding:
-      position: 1
+      position: 10
 
 
   filter:
     type: string?
     inputBinding:
-      position: 2
+      position: 5
       prefix: -F
     doc: |
       set custom filter for alignments
@@ -46,7 +46,7 @@ inputs:
   numFilter:
     type: string?
     inputBinding:
-      position: 3
+      position: 5
       prefix: --num-filter=
       separate: false
     doc: |
@@ -54,9 +54,12 @@ inputs:
       either of the numbers can be omitted
 
   format:
-    type: string?
+    type:
+      - 'null' 
+      - type: enum
+        symbols: [sam, bam, cram , json]
     inputBinding:
-      position: 4
+      position: 5
       prefix: -f
     doc: |
       specify which format to use for output (default is SAM)
@@ -72,7 +75,7 @@ inputs:
   header:
     type: boolean?
     inputBinding:
-      position: 6
+      position: 5
       prefix: -H
     doc: |
       output only header to stdout (if format=bam, the header is printed as SAM)
@@ -80,15 +83,15 @@ inputs:
   referenceInfo:
     type: boolean?
     inputBinding: 
-      position: 7
+      position: 5
       prefix: -I
     doc: |
       output to stdout only reference names and lengths in JSON
       
   regions:
-    type: string?
+    type: File[]?
     inputBinding:
-      position: 8
+      position: 15
       prefix: -L
     doc: |
       output only reads overlapping one of regions from the BED file
@@ -96,7 +99,7 @@ inputs:
   count:
     type: boolean?
     inputBinding:
-      position: 9
+      position: 5
       prefix: -c
     doc: |
       output to stdout only count of matching records, hHI are ignored
@@ -104,7 +107,7 @@ inputs:
   valid:
     type: boolean?
     inputBinding:
-      position: 10
+      position: 5
       prefix: -v
     doc: |
       output only valid alignments
@@ -112,7 +115,7 @@ inputs:
   samInput:
     type: boolean?
     inputBinding:
-      position: 11
+      position: 5
       prefix: -S
     doc: |
       specify that input is in SAM format
@@ -120,7 +123,7 @@ inputs:
   cramInput:
     type: boolean?
     inputBinding:
-      position: 12
+      position: 5
       prefix: -C
     doc: |
       specify that input is in CRAM format
@@ -128,7 +131,7 @@ inputs:
   refFileName:
     type: File?
     inputBinding:
-      position: 13
+      position: 5
       prefix: -T
     doc: |
       specify reference for writing CRAM
@@ -136,7 +139,7 @@ inputs:
   showProgress:
     type: boolean?
     inputBinding: 
-      position: 14
+      position: 5
       prefix: -p
     doc: |
       show progressbar in STDERR (works only for BAM files with no regions specified)
@@ -144,7 +147,7 @@ inputs:
   compressionLevel:
     type: int?
     inputBinding:
-      position: 15
+      position: 5
       prefix: -l
     doc: |
       specify compression level (from 0 to 9, works only for BAM output)
@@ -152,7 +155,7 @@ inputs:
   outputFileName:
     type: string?
     inputBinding:
-      position: 16
+      position: 5
       prefix: -o
     doc: |
       specify output filename
@@ -160,7 +163,7 @@ inputs:
   nThreads:
     type: int?
     inputBinding:
-      position: 17
+      position: 5
       prefix: -t
     doc: |
       maximum number of threads to use
@@ -168,7 +171,7 @@ inputs:
   subsample:
     type: File?
     inputBinding:
-      position: 18
+      position: 5
       prefix: -s
     doc: |
       subsample reads (read pairs)
@@ -176,7 +179,7 @@ inputs:
   subsamplingSeed:
     type: File?
     inputBinding:
-      position: 19
+      position: 5
       prefix: --subsampling-seed=
       separate: false
     doc: |
