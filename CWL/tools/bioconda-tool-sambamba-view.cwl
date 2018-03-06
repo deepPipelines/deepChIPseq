@@ -1,4 +1,3 @@
-
 class: CommandLineTool
 
 id: "sambamba_view"
@@ -59,8 +58,8 @@ inputs:
     inputBinding:
       position: 4
       prefix: -f
-   doc: |
-     specify which format to use for output (default is SAM)
+    doc: |
+      specify which format to use for output (default is SAM)
  
   withHeader:
     type: boolean?
