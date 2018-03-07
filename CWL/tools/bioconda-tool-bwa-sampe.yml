@@ -1,0 +1,134 @@
+#!/usr/bin/env cwl-runner
+
+cwlVersion: "v1.0"
+
+class: CommandLineTool
+
+
+s:author:
+  - class: s:Person
+    s:identifier: https://orcid.org/0000-0001-6231-4417
+    s:email: mailto:karl.nordstroem@uni-saarland.de
+    s:name: Karl Nordström
+
+hints:
+  - class: ResourceRequirement
+    coresMin: 1
+    ramMin: 4092
+    outdirMin: 512000
+  - class: DockerRequirement
+    dockerPull: "quay.io/biocontainers/bwa:0.6.2--1"
+
+requirements:
+- class: InlineJavascriptRequirement
+
+baseCommand: ["bwa", "sampe"]
+
+
+stdout: $( inputs.outputName )
+
+outputs:
+  sampeFile:
+    type: stdout
+
+
+inputs:
+
+  prefix:
+    type: string
+    doc: |
+      reference prefix
+    inputBinding:
+      position: 10
+
+  outputName:
+    type: string
+    doc: |
+      output file name 
+
+  aln1:
+    type: File
+    streamable: true
+    inputBinding:
+      position: 11
+
+
+  aln2:
+    type: File
+    streamable: true
+    inputBinding:
+      position: 12
+
+  fq1:
+    type: File
+    streamable: true
+    inputBinding:
+      position: 13
+
+  fq2:
+    type: File
+    streamable: true
+    inputBinding:
+      position: 14
+
+  noSW:
+    type: boolean?
+    doc: |
+      disable Smith-Waterman for the unmapped mate
+    inputBinding:
+      position: 5
+      prefix: "-s"
+
+  preloadIndex:
+    type: boolean?
+    doc: |
+      preload index into memory (for base-space reads only)
+    inputBinding:
+      position: 5
+      prefix: "-P"
+
+  maxHitsPaired:
+    type: int?
+    doc: |
+      maximum hits to output for paired reads [3]
+    inputBinding:
+      position: 5
+      prefix: "-n"
+
+  maxHitsDiscordant:
+    type: int?
+    doc: |
+      maximum hits to output for discordant pairs [10]
+    inputBinding:
+      position: 5
+      prefix: "-N"
+
+
+
+doc: |
+  Usage:   bwa sampe [options] <prefix> <in1.sai> <in2.sai> <in1.fq> <in2.fq>
+  
+  Options: -a INT   maximum insert size [500]
+           -o INT   maximum occurrences for one end [100000]
+           -n INT   maximum hits to output for paired reads [3]
+           -N INT   maximum hits to output for discordant pairs [10]
+           -c FLOAT prior of chimeric rate (lower bound) [1.0e-05]
+           -f FILE  sam file to output results to [stdout]
+           -r STR   read group header line such as `@RG\tID:foo\tSM:bar' [null]
+           -P       preload index into memory (for base-space reads only)
+           -s       disable Smith-Waterman for the unmapped mate
+           -A       disable insert size estimate (force -s)
+  
+  Notes: 1. For SOLiD reads, <in1.fq> corresponds R3 reads and <in2.fq> to F3.
+         2. For reads shorter than 30bp, applying a smaller -o is recommended to
+            to get a sensible speed at the cost of pairing accuracy.
+
+
+
+$namespaces:
+  s: https://schema.org/
+  edam: http://edamontology.org/
+
+$schemas:
+  - https://schema.org/docs/schema_org_rdfa.html
+  - http://edamontology.org/EDAM_1.18.owl
