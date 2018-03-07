@@ -84,7 +84,7 @@ inputs:
       prefix: "-e"
 
   minIndelEndDist:
-    type: int?]
+    type: int?
     doc: |
       do not put an indel within INT bp towards the ends [5]
     inputBinding:
