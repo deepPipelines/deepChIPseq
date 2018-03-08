@@ -36,26 +36,67 @@ outputs:
   bamFile:
     type: stdout
 
-  #is a complementBamFile needed here? 
-
 inputs:
 
   input:
     type: File
     inputBinding:
       position: 10
-      #where does the position come from?
 
   outputFileName:
     type: string
     inputBinding: 
-      position: 5
+      position: 15
     doc: |
       output file name
 
-   
+  sortByReadName:
+    type: boolean? 
+    inputBinding: 
+      position: 5
+      prefix: -n
+    doc: |
+      sort by name rather than by chromosomal coordinates
 
+  useOutPrefixInsteadOfPrefix:
+    type: boolean?
+    inputBinding: 
+      position: 5
+      prefix: -f
+    doc: |
+      use <out.prefix> as full file name instead of prefix
 
+  OutputToStdOut: 
+    type: boolean?
+    inputBinding: 
+      position: 5
+      prefix: -o
+    doc: |
+      put final output to stdout
+
+  compressionLevel:
+    type: int?
+    inputBinding:
+      position: 5
+      prefix: -l
+    doc: |
+      compression level, from 0 to 9 [-1]
+
+  numberOfThreads:
+    type: int?
+    inputBinding:
+      position: 5
+      prefix: --threads
+    doc: |
+      number of BAM compression threads to use in addition to main thread [0].
+
+  maxMemoryPerThread:
+     type: string?
+     inputBinding:
+       position: 5
+       prefix: -m
+     doc: |
+       Approximately the maximum required memory per thread, specified either in bytes or with a K, M or G suffix [768 MiB]
 
 doc: |
   Usage: samtools sort [options] <in.bam> <out.prefix>

@@ -136,8 +136,6 @@ doc: |
   Warning: `-a bwtsw' does not work for short genomes, while `-a is' and
            `-a div' do not work not for long genomes.
 
-
-
 $namespaces:
   s: https://schema.org/
   edam: http://edamontology.org/
