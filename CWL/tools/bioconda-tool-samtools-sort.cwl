@@ -27,9 +27,9 @@ hints:
   - class: DockerRequirement
     dockerPull: "quay.io/biocontainers/samtools:1.3.1--5"
 
-baseCommand: ["samtools", "sort"]
+baseCommand: ["samtools", "sort", "-o"] 
 
-stdout: $( inputs.outputFileName )
+stdout: $( inputs.outputPrefix + ".bam" )
 
 outputs: 
 
@@ -43,7 +43,7 @@ inputs:
     inputBinding:
       position: 10
 
-  outputFileName:
+  outputPrefix:
     type: string
     inputBinding: 
       position: 15
@@ -65,14 +65,6 @@ inputs:
       prefix: -f
     doc: |
       use <out.prefix> as full file name instead of prefix
-
-  OutputToStdOut: 
-    type: boolean?
-    inputBinding: 
-      position: 5
-      prefix: -o
-    doc: |
-      put final output to stdout
 
   compressionLevel:
     type: int?
