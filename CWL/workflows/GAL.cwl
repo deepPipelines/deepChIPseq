@@ -45,6 +45,10 @@ steps:
       input: inputSampleID_R1
       outputName: outputName
       prefix: prefix
+      threads: 
+       valueFrom: $( 12 )
+      minQual:
+        valueFrom: $( 20 )
     out:
       [alnFile]
 
