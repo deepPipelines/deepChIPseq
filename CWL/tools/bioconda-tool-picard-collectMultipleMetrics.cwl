@@ -31,10 +31,35 @@ baseCommand: ["picard", "CollectMultipleMetrics"]
 
 outputs:
 
-  OUTPUT_output:
+  AlignmentSummarymetrics:
     type: File
     outputBinding:
       glob: $(inputs.OUTPUT)
+
+  InsertSizemetrics:
+    type: File
+    outputBinding: 
+      glob: $(inputs.OUTPUT)
+
+  QualityByCyclemetrics:
+    type: File
+    outputBinding: 
+      glob: $(inputs.OUTPUT)
+
+  QualityDistributionmetrics:
+    type: File
+    outputBinding:
+      glob: $(inputs.OUTPUT)
+
+  QualityByCyclemetricsTwo:
+    type: File
+    outputBinding:
+       glob: $(inputs.OUTPUT)
+
+  QualityDistributionmetricsTwo:
+    type: File
+    outputBinding:
+       glob: $(inputs.OUTPUT)
 
 inputs:
   

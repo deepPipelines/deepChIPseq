@@ -5,90 +5,115 @@ cwlVersion: v1.0
 class: Workflow
 
 inputs:
-  inputSampleIDR1: File
-  ex: string
-  inputSampleIDR2: File
-  ex: string
-  inputReferenceGenome: File
-  ex: string
-
+  inputSampleID_R1: File
+  inputSampleID_R2: File
+  fq1file: File
+  fq2file: File
+  reference_genome: File
+  outputName: string
+  prefix: string
+  
 outputs:
-  alignmentSummarymetrics:
+  AlignmentSummarymetrics:
     type: File
-    outputSource: PicardCollectMultipleMetrics/alignmentSummarymetrics
+    outputSource: picardCollectMultipleMetrics/AlignmentSummarymetrics
 
-  insertSizemetrics:
+  InsertSizemetrics:
     type: File
-    outputSource: PicardCollectMultipleMetrics/insertSizeMetrics
+    outputSource: picardCollectMultipleMetrics/InsertSizemetrics 
 
-  qualityByCyclemetrics:
+  QualityByCyclemetrics:
     type: File
-    outputSource: PicardCollectMultipleMetrics/qualityByCyclemetrics
+    outputSource: picardCollectMultipleMetrics/QualityByCyclemetrics
 
-  qualityByDistributionmetrics:
+  QualityDistributionmetrics:
     type: File
-    outputSource: PicardCollectMultipleMetrics/qualityDistributionmetrics
+    outputSource: picardCollectMultipleMetrics/QualityDistributionmetrics
 
-  qualityByCyclemetricsTwo:
+  QualityByCyclemetricsTwo:
     type: File
-    outputSource: PicardCollectMultipleMetrics/qualityByCyclemetricsTwo
+    outputSource: picardCollectMultipleMetrics/QualityByCyclemetricsTwo
 
-  qualityByDistributionmetricsTwo:
+  QualityDistributionmetricsTwo:
     type: File
-    outputSource: PicardCollectMultipleMetrics/qualityDistributionmetrics
+    outputSource: picardCollectMultipleMetrics/QualityDistributionmetricsTwo
 
 steps:
-  bwaAln:
-    run: bioconda-tool-bwa-aln.yml
+  bwaAln1:
+    run: ../tools/bioconda-tool-bwa-aln.yml
     in:
-      fastqfile: inputSampleIDR1
-      fastqfile: inputSampleIDR2
-      fastafile: inputReferenceGenome
+      input: inputSampleID_R1
+      outputName: outputName
+      prefix: prefix
     out:
-      [saiFileReadOne]
-     # [saiFileReadTwo]
+      [alnFile]
+
+  bwaAln2:
+    run: ../tools/bioconda-tool-bwa-aln.yml
+    in: 
+      input: inputSampleID_R2
+      outputName: outputName
+      prefix: prefix
+    out: 
+       [alnFile]
 
   bwaSampe:
-    run: bioconda-tool-bwa-sampe.yml
+    run: ../tools/bioconda-tool-bwa-sampe.yml
     in:
-      src: bwaAln/saiFileReadOne
-           bwaAln/saiFileReadTwo
+      aln1: bwaAln1/alnFile
+      aln2: bwaAln2/alnFile
+      fq1: fq1file 
+      fq2: fq2file 
+      prefix: prefix
+      outputName: outputName
+      src: [bwaAln1/alnFile, bwaAln2/alnFile] 
     out:
-      [samFile]
+      [sampeFile]
 
   samtoolsView:
-    run: bioconda-tool-samtools-view.cwl
+    run: ../tools/bioconda-tool-samtools-view.cwl
     in:
-      src: bwaSampe/samFile
+      input: bwaSampe/sampeFile
+      outputFileName: 
+        valueFrom: $( outputName + ".bam") 
+      src: bwaSampe/sampeFile
     out:
       [bamFile]
 
   samtoolsSort:
-    run: bioconda-tool-samtools-sort.cwl
+    run: ../tools/bioconda-tool-samtools-sort.cwl
     in:
+      input: samtoolsView/bamFile
+      outputPrefix: prefix
       src: samtoolsView/bamFile
-    out: [bamFileSortedByCoordinates]
+    out: [bamFile]
 
   picardMarkDuplicates:
-    run: bioconda-tool-picard-MarkDuplicates.cwl
-    in: 
-      src: samtoolSort/bamFileSortedByCoordinates
-    out: [bamFileWithDuplicates]
+    run: ../tools/bioconda-tool-picard-MarkDuplicates.cwl
+    in:
+      INPUT: samtoolsSort/bamFile
+      OUTPUT: 
+        valueFrom: $( outputName + ".bam")
+      METRICS_FILE:
+        valueFrom: $( outputName + ".markDuplicates.txt" )
+      src: samtoolsSort/bamFile
+    out: [METRICS_FILE_output, OUTPUT_output]
 
   samtoolsFlagstat:
-    run: bioconda-tool-samtools-flagstat.cwl
+    run: ../tools/bioconda-tool-samtools-flagstat.cwl
     in: 
-      src: picardMarkDuplicates/bamFileWithDuplicates
-    out: []
-    #output is here to stdout, is this correct then?
+      input: picardMarkDuplicates/OUTPUT_output
+      outputName: 
+        valueFrom: $( outputName + ".flagstat.txt")
+      src: [picardMarkDuplicates/METRICS_FILE_output, picardMarkDuplicates/OUTPUT_output]
+    out: 
+      - flagstat
 
   picardCollectMultipleMetrics: 
-    run: bioconda-tool-picard-collectMultipleMetrics.cwl
-    in: 
-      src: picardMarkDuplicates/bamFileWithDuplicates
-    out: [alignmentSummarymetrics]
-        # [insertSizemetrics]
-        # [qualityByCyclemetrics]
-        # [qualityDistributionmetrics]
-        # [qualityByCyclemetricsTwo]
-        # [qualityDistributionmetricsTwo]
+    run: ../tools/bioconda-tool-picard-collectMultipleMetrics.cwl
+    in:
+      INPUT: picardMarkDuplicates/OUTPUT_output
+      OUTPUT:
+        valueFrom: $( outputName + ".collectMultipleMetrics.txt")
+      src: [picardMarkDuplicates/METRICS_FILE_output, picardMarkDuplicates/OUTPUT_output]
+    out: [AlignmentSummarymetrics, InsertSizemetrics, QualityByCyclemetrics, QualityDistributionmetrics, QualityByCyclemetricsTwo, QualityDistributionmetricsTwo]
