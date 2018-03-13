@@ -5,8 +5,6 @@ cwlVersion: v1.0
 class: Workflow
 
 inputs:
-  inputSampleID_R1: File
-  inputSampleID_R2: File
   fq1file: File
   fq2file: File
   reference_genome: File
@@ -42,7 +40,7 @@ steps:
   bwaAln1:
     run: ../tools/bioconda-tool-bwa-aln.yml
     in:
-      input: inputSampleID_R1
+      input: fq1file
       outputName: outputName
       prefix: prefix
       threads: 
@@ -55,7 +53,7 @@ steps:
   bwaAln2:
     run: ../tools/bioconda-tool-bwa-aln.yml
     in: 
-      input: inputSampleID_R2
+      input: fq2file
       outputName: outputName
       prefix: prefix
       threads:
