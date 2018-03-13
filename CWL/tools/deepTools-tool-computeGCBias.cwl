@@ -83,6 +83,36 @@ inputs:
     inputBinding:
       prefix: --extraSampling 
 
+  region:
+    type: ["null", string]
+    doc: Region of the genome to limit the operation to - this is useful when testing parameters to reduce the computing time. The format is chr -start -end, for example --region chr10 or --region chr10 -456700 -891000.
+    inputBinding:
+      prefix: -r
+
+  blackListFileName:
+    type: ["null", File]
+                 # string
+    doc: A BED file containing regions that should be excluded from all analyses. Currently this works by rejecting genomic chunks that happen to overlap an entry. Consequently, for BAM files, if a read partially overlaps a blacklisted rebin size is set to 300 bases, which is close to the standard fragment size for Illumina machines. However, if the depth of sequencing is low, a larger bin size will be required, otherwise many bins will not overlap with any read
+    inputBinding:
+      prefix: --regionSize
+
+  numberOfProcessors:
+    type: 
+    - "null"
+    - type: enum
+      symbols: ['max/2', 'max']
+    inputBinding:
+      position: 10
+      prefix: -p
+    doc: Number of processors to use. Type "max/2" to use half the maximum number of processors or "max" to use all available processors. (default max/2)
+
+  verbose:
+    type: boolean?
+    inputBinding:
+      position: 10
+      prefix: -v
+    doc: Set to see processing messages. (default False)
+
   GCbiasFrequenciesFile:
     type: string
         # File
@@ -90,6 +120,15 @@ inputs:
     doc: Path to save the file containing the observed and expected read frequencies per %%GC-content. This file is needed to run the correctGCBias tool. This is a text file.
     inputBinding:
       prefix: -freq 
+
+  plotFileFormat:
+    type:
+    - "null"
+    - type: enum
+      symbols: ['png', 'pdf', 'svg', 'eps']
+    doc: image format type. If given, this option overrides the image format based on the plotFile ending. The available options are - "png", "eps", "pdf" and "svg"
+    inputBinding:
+      prefix: --plotFileFormat
 
   biasPlot:
     type: ["null", string]
@@ -102,38 +141,95 @@ inputs:
     default: 300
     doc: To plot the reads per %%GC over a regionthe size of the region is required. By default, the bin size is set to 300 bases, which is close to the standard fragment size for Illumina machines. However, if the depth of sequencing is low, a larger bin size will be required, otherwise many bins will not overlap with any read
     inputBinding:
-      prefix: --regionSize 
+      prefix: --regionSize
 
-  plotFileFormat:
-    type:
-    - "null"
-    - type: enum
-      symbols: ['png', 'pdf', 'svg', 'eps']
-    doc: image format type. If given, this option overrides the image format based on the plotFile ending. The available options are - "png", "eps", "pdf" and "svg"
-    inputBinding:
-      prefix: --plotFileFormat 
+doc: |
 
-  region:
-    type: ["null", string]
-    doc: Region of the genome to limit the operation to - this is useful when testing parameters to reduce the computing time. The format is chr -start -end, for example --region chr10 or --region chr10 -456700 -891000.
-    inputBinding:
-      prefix: -r 
+  usage: computeGCBias -b file.bam --effectiveGenomeSize 2150570000 -g mm9.2bit -l 200 --GCbiasFrequenciesFile freq.txt [options]
 
-  blackListFileName:
-    type: ["null", File]
-                 # string
-    doc: A BED file containing regions that should be excluded from all analyses. Currently this works by rejecting genomic chunks that happen to overlap an entry. Consequently, for BAM files, if a read partially overlaps a blacklisted rebin size is set to 300 bases, which is close to the standard fragment size for Illumina machines. However, if the depth of sequencing is low, a larger bin size will be required, otherwise many bins will not overlap with any read
-    inputBinding:
-      prefix: --regionSize 
+  Required arguments:
+    -b bam file
+      Sorted BAM file. (default: None)
+    --effectiveGenomeSize EFFECTIVEGENOMESIZE
+      The effective genome size is the portion of the genome
+      that is mappable. Large fractions of the genome are
+      stretches of NNNN that should be discarded. Also, if
+      repetitive regions were not included in the mapping of
+      reads, the effective genome size needs to be adjusted
+      accordingly. Common values are: mm9: 2150570000,
+      hg19:2451960000, dm3:121400000 and ce10:93260000. See
+      Table 2 of http://www.plosone.org/article/info:doi/10.
+      1371/journal.pone.0030377 or http://www.nature.com/nbt
+      /journal/v27/n1/fig_tab/nbt.1518_T1.html for several
+      effective genome sizes. This value is needed to detect
+      enriched regions that, if not discarded can bias the
+      results. (default: None)
+    -g 2bit FILE
+      Genome in two bit format. Most genomes can be found
+      here: http://hgdownload.cse.ucsc.edu/gbdb/ Search for
+      the .2bit ending. Otherwise, fasta files can be
+      converted to 2bit using the UCSC programm called
+      faToTwoBit available for different plattforms at
+      http://hgdownload.cse.ucsc.edu/admin/exe/ (default:
+      None)
+    -l FRAGMENTLENGTH
+       Fragment length used for the sequencing. If paired-end
+       reads are used, the fragment length is computed based
+       from the bam file (default: None)
 
-  plotFileFormat:
-    type:
-    - "null"
-    - type: enum
-      symbols: ['png', 'pdf', 'svg', 'eps']
-    doc: image format type. If given, this option overrides the image format based on the plotFile ending. The available options are - "png", "eps", "pdf" and "svg"
-    inputBinding:
-      prefix: --plotFileFormat 
+  Optional arguments:
+    --sampleSize SAMPLESIZE
+      Number of sampling points to be considered. (default:
+      50000000.0)
+    --extraSampling BED file
+      BED file containing genomic regions for which extra
+      sampling is required because they are underrepresented
+      in the genome. (default: None)
+    -r CHR:START:END
+      Region of the genome to limit the operation to - this
+      is useful when testing parameters to reduce the
+      computing time. The format is chr:start:end, for
+      example --region chr10 or --region
+      chr10:456700:891000. (default: None)
+    -bl BED file
+      A BED file containing regions that should be excluded
+      from all analyses. Currently this works by rejecting
+      genomic chunks that happen to overlap an entry.
+      Consequently, for BAM files, if a read partially
+      overlaps a blacklisted region or a fragment spans over
+      it, then the read/fragment might still be considered.
+      (default: None)
+    -p INT
+      Number of processors to use. Type "max/2" to use half
+      the maximum number of processors or "max" to use all
+      available processors. (default: max/2)
+   -v
+      Set to see processing messages. (default: False)
+
+  Output options:
+    -freq FILE
+      Path to save the file containing the observed and
+      expected read frequencies per %GC-content. This file
+      is needed to run the correctGCBias tool. This is a
+      text file. (default: None)
+    --plotFileFormat      
+      image format type. If given, this option overrides the
+      image format based on the plotFile ending. The
+      available options are: "png", "eps", "pdf" and "svg"
+      (default: None)
+
+  Diagnostic plot options:
+    --biasPlot FILE NAME  
+      If given, a diagnostic image summarizing the GC-bias
+      will be saved. (default: None)
+    --regionSize INT
+      To plot the reads per %GC over a regionthe size of the
+      region is required. By default, the bin size is set to
+      300 bases, which is close to the standard fragment
+      size for Illumina machines. However, if the depth of
+      sequencing is low, a larger bin size will be required,
+      otherwise many bins will not overlap with any read
+      (default: 300)
 
 $namespaces:
   s: https://schema.org/
