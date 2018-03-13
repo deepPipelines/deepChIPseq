@@ -133,14 +133,17 @@ inputs:
       prefix: -bl 
 
   numberOfProcessors:
-#   type: ["null", string]
-    type: ["null", int]
-    default: max/2
-    doc: Number of processors to use. Type "max/2" to use half the maximum number of processors or "max" to use all available processors.
+    type: 
+    - "null"
+    - type: enum
+      symbols: ['max/2', 'max']
     inputBinding:
-      prefix: -p 
+      position: 10
+      prefix: -p
+    doc: |
+      Number of processors to use. Type "max/2" to use half the maximum number of processors or "max" to use all available processors. (default: max/2)
 
-  verbose:
+   verbose:
     type: ["null", boolean]
     default: False
     doc: Set to see processing messages.
