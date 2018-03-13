@@ -58,6 +58,10 @@ steps:
       input: inputSampleID_R2
       outputName: outputName
       prefix: prefix
+      threads:
+         valueFrom: $( 12 )
+      minQual:
+         valueFrom: $ ( 20 )
     out: 
        [alnFile]
 
@@ -70,6 +74,12 @@ steps:
       fq2: fq2file 
       prefix: prefix
       outputName: outputName
+      preloadIndex: 
+        valueFrom: $( 1==1 )
+      maximumInsertSize: 
+        valueFrom: $( 1000 )
+      readGroupHeaderLine:
+        valueFrom: $( reference_genome )
       src: [bwaAln1/alnFile, bwaAln2/alnFile] 
     out:
       [sampeFile]
@@ -79,7 +89,15 @@ steps:
     in:
       input: bwaSampe/sampeFile
       outputFileName: 
-        valueFrom: $( outputName + ".bam") 
+        valueFrom: $( outputName + ".bam")
+      useNoCompression: 
+         valueFrom: $( 1==1 )
+      outBam:
+         valueFrom: $( 1==1 )
+      includeHeader: 
+         valueFrom: $( 1==1 )
+      inputFormat: 
+         valueFrom: $ ( 1==1 ) 
       src: bwaSampe/sampeFile
     out:
       [bamFile]
@@ -99,7 +117,17 @@ steps:
       OUTPUT: 
         valueFrom: $( outputName + ".bam")
       METRICS_FILE:
-        valueFrom: $( outputName + ".markDuplicates.txt" )
+        valueFrom: $( outputName + ".PicardMarkDupmetrics.txt" )
+      VALIDATION_STRINGENCY:
+        valueFrom: $( SILENT )
+      REMOVE_DUPLICATES: 
+        valueFrom: $( 1==0 )
+      ASSUME_SORTED: 
+        valueFrom: $( 1==1 )
+      CREATE_INDEX:
+        valueFrom: $( 1==1)
+      MAX_RECORDS_IN_RAM:
+        valueFrom: $( 12500000 )
       src: samtoolsSort/bamFile
     out: [METRICS_FILE_output, OUTPUT_output]
 
@@ -119,5 +147,13 @@ steps:
       INPUT: picardMarkDuplicates/OUTPUT_output
       OUTPUT:
         valueFrom: $( outputName + ".collectMultipleMetrics.txt")
+      REFERNCE_SEQUENCE: 
+        valueFrom: $( reference_genome )
+      ASSUME_SORTED: 
+        valueFrom: $( 1==1 )
+      VALIDATION_STRINGENCY:
+        valueFrom: $( SILENT )
+      PROGRAM: 
+        valueFrom: $( [CollectAlignmentSummaryMetrics, CollectInsertSizeMetrics, QualityScoreDistribution, MeanQualityByCycle] )
       src: [picardMarkDuplicates/METRICS_FILE_output, picardMarkDuplicates/OUTPUT_output]
     out: [AlignmentSummarymetrics, InsertSizemetrics, QualityByCyclemetrics, QualityDistributionmetrics, QualityByCyclemetricsTwo, QualityDistributionmetricsTwo]

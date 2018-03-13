@@ -256,6 +256,13 @@ inputs:
     doc: |
       Reference sequence FASTA FILE [null]
 
+  inputFormat:
+    type: boolean?
+    inputBinding:
+      position: 5
+      prefix: -S
+    doc: |
+      input file is a SAM-File, if this parameter is set to true 
 
 doc: |
   Usage: samtools view [options] <in.bam>|<in.sam>|<in.cram> [region ...]

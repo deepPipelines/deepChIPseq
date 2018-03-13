@@ -71,6 +71,14 @@ inputs:
     inputBinding:
       position: 14
 
+  maximumInsertSize:
+    type: int?
+    inputBinding:
+      position: 5
+      prefix: "-a"
+    doc: |
+      maximum nsert size [500]
+
   noSW:
     type: boolean?
     doc: |
@@ -103,7 +111,13 @@ inputs:
       position: 5
       prefix: "-N"
 
-
+  readGroupHeaderLine:
+    type: string?
+    inputBinding:
+      position: 5
+      prefix: "-r"
+    doc: |
+      read group header line such as '@RG\tID:foo\tSM:bar' [null]
 
 doc: |
   Usage:   bwa sampe [options] <prefix> <in1.sai> <in2.sai> <in1.fq> <in2.fq>
