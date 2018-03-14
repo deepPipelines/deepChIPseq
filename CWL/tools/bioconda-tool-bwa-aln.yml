@@ -139,8 +139,6 @@ inputs:
       position: 1
       prefix: "-q"
 
-
-
 doc: |
   Usage:   bwa aln [options] <prefix> <in.fq>
 

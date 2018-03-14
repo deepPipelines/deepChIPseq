@@ -1,15 +1,15 @@
 fq1file:
   class: File
-  path: /projects/student/Wiebke/data/HepG2_H3K122ac_181/161116_SN7001355_0090_BC831BACXX/L006/HepG2_H3K122ac_181_GCCAT_L006_R1_001.fastq.gz
+  path: /projects/student/Wiebke/data/HepG2_H3K122ac_181/161116_SN7001355_0090_BC831BACXX/L006/HepG2_H3K122ac_181_GCCAAT_L006_R1_001.fastq.gz
 
 fq2file:
   class: File
-  path: /projects/student/Wiebke/data/HepG2_H3K122ac_181/161116_SN7001355_0090_BC831BACXX/L006/HepG2_H3K122ac_181_GCCAT_L006_R2_001.fastq.gz
+  path: /projects/student/Wiebke/data/HepG2_H3K122ac_181/161116_SN7001355_0090_BC831BACXX/L006/HepG2_H3K122ac_181_GCCAAT_L006_R2_001.fastq.gz
 
 reference_genome:
   class: File
   path: /projects/student/Wiebke/reference/hs37d5_PhiX_Lambda.fa 
 
-outputName: string
+outputName: outputName
 
-prefix: stringtwo
+prefix: prefix

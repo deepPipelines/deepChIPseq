@@ -44,7 +44,7 @@ steps:
       outputName: outputName
       prefix: prefix
       threads: 
-       valueFrom: $( 12 )
+        valueFrom: $( 12 )
       minQual:
         valueFrom: $( 20 )
     out:
@@ -57,9 +57,9 @@ steps:
       outputName: outputName
       prefix: prefix
       threads:
-         valueFrom: $( 12 )
+        valueFrom: $( 12 )
       minQual:
-         valueFrom: $ ( 20 )
+        valueFrom: $ ( 20 )
     out: 
        [alnFile]
 
