@@ -28,14 +28,6 @@ outputs:
 
 inputs:
 
-  help:
-    type: boolean?
-    inputBinding:
-      position: 5
-      prefix: -h
-    doc: |
-      help text
-
   tFile:
     type: File
     inputBinding:
