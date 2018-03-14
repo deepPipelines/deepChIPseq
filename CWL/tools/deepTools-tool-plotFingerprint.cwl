@@ -24,7 +24,7 @@ requirements:
   - class: InlineJavascriptRequirement
 
 baseCommand: "plotFingerprint"
-stdout: $( inputs.outRawCounts )
+stdout: output.txt
 
 outputs:
 
