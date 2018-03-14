@@ -145,7 +145,6 @@ inputs:
 
    verbose:
     type: ["null", boolean]
-    default: False
     doc: Set to see processing messages.
     inputBinding:
       prefix: -v 
@@ -158,7 +157,6 @@ inputs:
 
   normalizeUsingRPKM:
     type: ["null", boolean]
-    default: False
     doc: Use Reads Per Kilobase per Million reads to normalize the number of reads per bin. The formula is - RPKM (per bin) = number of reads per bin / ( number of mapped reads (in millions) * bin length (kb) ). Each read is considered independently,if you want to only count either of the mate pairs inpaired-end data, use the --samFlag option.
     inputBinding:
       prefix: --normalizeUsingRPKM 
@@ -176,7 +174,6 @@ inputs:
 
   skipNonCoveredRegions:
     type: ["null", boolean]
-    default: False
     doc: This parameter determines if non-covered regions (regions without overlapping reads) in a BAM file should be skipped. The default is to treat those regions as having a value of zero. The decision to skip non-covered regions depends on the interpretation of the data. Non-covered regions may represent, for example, repetitive regions that should be skipped.
     inputBinding:
       prefix: --skipNAs 
@@ -189,14 +186,12 @@ inputs:
 
   extendReads:
     type: ["null", int]
-    default: False
     doc: This parameter allows the extension of reads to fragment size. If set, each read is extended, without exception. NOTE; This feature is generally NOT recommended for spliced-read data, such as RNA-seq, as it would extend reads over skipped regions. Single-end; Requires a user specified value for the final fragment length. Reads that already exceed this fragment length will not be extended. Paired-end; Reads with mates are always extended to match the fragment size defined by the two read mates. Unmated reads, mate reads that map too far apart (>4x fragment length) or even map to different chromosomes are treated like single-end reads. The input of a fragment length value is optional. If no value is specified, it is estimated from the data (mean of the fragment size of all mate reads). (default False) 
     inputBinding:
       prefix: -e
 
   ignoreDuplicates:
     type: ["null", boolean]
-    default: False
     doc: If set, reads that have the same orientation and start position will be considered only once. If reads are paired, the mate's position also has to coincide to ignore a read.
     inputBinding:
       prefix: --ignoreDuplicates 
@@ -209,7 +204,6 @@ inputs:
 
   centerReads:
     type: ["null", boolean]
-    default: False
     doc: By adding this option, reads are centered with respect to the fragment length. For paired-end data, the read is centered at the fragment length defined by the two ends of the fragment. For single-end data, the given fragment length is used. This option is useful to get a sharper signal around enriched regions.
     inputBinding:
       prefix: --centerReads 

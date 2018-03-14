@@ -58,7 +58,6 @@ inputs:
 
   binSize:
     type: int?
-    default: 10000
     inputBinding:
       position: 10
       prefix: -bs
@@ -67,7 +66,6 @@ inputs:
 
   distanceBetweenBins:
     type: int?
-    default: 0
     inputBinding:
       position: 10
       prefix: -n

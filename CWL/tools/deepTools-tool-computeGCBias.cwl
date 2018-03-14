@@ -72,7 +72,6 @@ inputs:
   sampleSize:
     type: ["null", float]
                  # int
-    default: 50000000.0
     doc: Number of sampling points to be considered.
     inputBinding:
       prefix: --sampleSize 
@@ -138,7 +137,6 @@ inputs:
 
   regionSize:
     type: ["null", int]
-    default: 300
     doc: To plot the reads per %%GC over a regionthe size of the region is required. By default, the bin size is set to 300 bases, which is close to the standard fragment size for Illumina machines. However, if the depth of sequencing is low, a larger bin size will be required, otherwise many bins will not overlap with any read
     inputBinding:
       prefix: --regionSize
