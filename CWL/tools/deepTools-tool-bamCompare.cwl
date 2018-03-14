@@ -83,7 +83,7 @@ inputs:
       prefix: -l 
 
   numberOfSamples:
-    type: ["null", int]
+    type: ["null", float]
     default: 100000.0
     doc: Only relevant when SES is chosen for the scaleFactorsMethod. Number of samplings taken from the genome to compute the scaling factors.
     inputBinding:
@@ -143,7 +143,7 @@ inputs:
     doc: |
       Number of processors to use. Type "max/2" to use half the maximum number of processors or "max" to use all available processors. (default: max/2)
 
-   verbose:
+  verbose:
     type: ["null", boolean]
     doc: Set to see processing messages.
     inputBinding:
