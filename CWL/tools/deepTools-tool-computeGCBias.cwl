@@ -113,7 +113,7 @@ inputs:
     doc: Set to see processing messages. (default False)
 
   GCbiasFrequenciesFile:
-    type: string
+    type: string?
         # File
 
     doc: Path to save the file containing the observed and expected read frequencies per %%GC-content. This file is needed to run the correctGCBias tool. This is a text file.
