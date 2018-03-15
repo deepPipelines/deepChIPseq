@@ -46,7 +46,8 @@ steps:
     run: ../tools/bioconda-tool-bwa-aln.yml
     in:
       input: fq1file
-      outputName: outputName
+      outputName:
+        valueFrom:  $( outputName + "_R1_Aln" )
       prefix: prefix
       threads: 
         valueFrom: $( 12 )
@@ -59,7 +60,8 @@ steps:
     run: ../tools/bioconda-tool-bwa-aln.yml
     in: 
       input: fq2file
-      outputName: outputName
+      outputName: 
+        valueFrom: $( outputName + "_R2_Aln" )
       prefix: prefix
       threads:
         valueFrom: $( 12 )
@@ -92,7 +94,7 @@ steps:
     in:
       input: bwaSampe/sampeFile
       outputFileName: 
-        valueFrom: outputName + ".bam"
+        valueFrom: $( inputs.outputName + ".bam")
       useNoCompression: 
          valueFrom: $( 1==1 )
       outBam:

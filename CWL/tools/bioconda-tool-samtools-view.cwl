@@ -51,8 +51,6 @@ inputs:
 
   outputFileName:
     type: string
-    inputBinding:
-      position: 5
     doc: |
       output file name
   
