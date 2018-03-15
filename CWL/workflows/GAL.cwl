@@ -4,6 +4,11 @@ cwlVersion: v1.0
 
 class: Workflow
 
+requirements:
+ - class: StepInputExpressionRequirement
+ - class: InlineJavascriptRequirement
+ - class: MultipleInputFeatureRequirement
+
 inputs:
   fq1file: File
   fq2file: File
@@ -59,7 +64,7 @@ steps:
       threads:
         valueFrom: $( 12 )
       minQual:
-        valueFrom: $ ( 20 )
+        valueFrom: $( 20 )
     out: 
        [alnFile]
 
@@ -77,7 +82,7 @@ steps:
       maximumInsertSize: 
         valueFrom: $( 1000 )
       readGroupHeaderLine:
-        valueFrom: $( reference_genome )
+        valueFrom: readgroupinformation
       src: [bwaAln1/alnFile, bwaAln2/alnFile] 
     out:
       [sampeFile]
@@ -87,7 +92,7 @@ steps:
     in:
       input: bwaSampe/sampeFile
       outputFileName: 
-        valueFrom: $( outputName + ".bam")
+        valueFrom: outputName + ".bam"
       useNoCompression: 
          valueFrom: $( 1==1 )
       outBam:
@@ -95,7 +100,7 @@ steps:
       includeHeader: 
          valueFrom: $( 1==1 )
       inputFormat: 
-         valueFrom: $ ( 1==1 ) 
+         valueFrom: $( 1==1 ) 
       src: bwaSampe/sampeFile
     out:
       [bamFile]

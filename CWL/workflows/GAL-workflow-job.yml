@@ -8,8 +8,8 @@ fq2file:
 
 reference_genome:
   class: File
-  path: /projects/student/Wiebke/reference/hs37d5_PhiX_Lambda.fa 
+  path: /projects/student/Wiebke/reference/hs37d5_PhiX_Lambda.fa
 
-outputName: outputName
+outputName: bamFile
 
 prefix: prefix
