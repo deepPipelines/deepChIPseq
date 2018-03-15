@@ -10,6 +10,6 @@ reference_genome:
   class: File
   path: /projects/student/Wiebke/reference/hs37d5_PhiX_Lambda.fa
 
-outputName: bamFile
+outputName: "bamFile"
 
 prefix: /projects/student/Wiebke/reference/hs37d5_PhiX_Lambda.fa

@@ -46,8 +46,9 @@ steps:
     run: ../tools/bioconda-tool-bwa-aln.yml
     in:
       input: fq1file
+      name: outputName
       outputName:
-        valueFrom:  $( outputName + "_R1_Aln" )
+        valueFrom:  $( inputs.name + "_R1_Aln" )
       prefix: prefix
       threads: 
         valueFrom: $( 12 )
@@ -60,8 +61,9 @@ steps:
     run: ../tools/bioconda-tool-bwa-aln.yml
     in: 
       input: fq2file
+      name: outputName
       outputName: 
-        valueFrom: $( outputName + "_R2_Aln" )
+        valueFrom: $( inputs.name + "_R2_Aln" )
       prefix: prefix
       threads:
         valueFrom: $( 12 )
