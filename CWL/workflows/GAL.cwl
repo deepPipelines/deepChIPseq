@@ -22,6 +22,10 @@ outputs:
     type: File[]
     outputSource: picardCollectMultipleMetrics/summaryFiles
 
+  bamFileMarkDuplicates:
+    type: File
+    outputSource: picardMarkDuplicates/OUTPUT_output
+
 #  AlignmentSummarymetrics:
 #    type: File
 #    outputSource: picardCollectMultipleMetrics/AlignmentSummarymetrics
