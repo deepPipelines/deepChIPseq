@@ -31,35 +31,40 @@ baseCommand: ["picard", "CollectMultipleMetrics"]
 
 outputs:
 
-  AlignmentSummarymetrics:
-    type: File
+  summaryFiles:
+    type: File[]
     outputBinding:
-      glob: $(inputs.OUTPUT)
+      glob: $(inputs.OUTPUT + "*")
 
-  InsertSizemetrics:
-    type: File
-    outputBinding: 
-      glob: $(inputs.OUTPUT)
+#  AlignmentSummarymetrics:
+#    type: File
+#    outputBinding:
+#      glob: $(inputs.OUTPUT)
 
-  QualityByCyclemetrics:
-    type: File
-    outputBinding: 
-      glob: $(inputs.OUTPUT)
+#  InsertSizemetrics:
+#    type: File
+#    outputBinding: 
+#      glob: $(inputs.OUTPUT)
 
-  QualityDistributionmetrics:
-    type: File
-    outputBinding:
-      glob: $(inputs.OUTPUT)
+#  QualityByCyclemetrics:
+#    type: File
+#    outputBinding: 
+#      glob: $(inputs.OUTPUT)
 
-  QualityByCyclemetricsTwo:
-    type: File
-    outputBinding:
-       glob: $(inputs.OUTPUT)
+#  QualityDistributionmetrics:
+#    type: File
+#    outputBinding:
+#      glob: $(inputs.OUTPUT)
 
-  QualityDistributionmetricsTwo:
-    type: File
-    outputBinding:
-       glob: $(inputs.OUTPUT)
+#  QualityByCyclemetricsTwo:
+#    type: File
+#    outputBinding:
+#       glob: $(inputs.OUTPUT)
+
+#  QualityDistributionmetricsTwo:
+#    type: File
+#    outputBinding:
+#       glob: $(inputs.OUTPUT)
 
 inputs:
   
@@ -104,24 +109,26 @@ inputs:
 
   PROGRAM:
     inputBinding: 
-      position: 5
-      prefix: "PROGRAM="
-      separate: false
+      position: 10
     type:
      - 'null'
      - type: array
-       items:  
-         type: enum
-         symbols: 
-           - CollectAlignmentSummaryMetrics
-           - CollectInsertSizeMetrics
-           - QualityScoreDistribution
-           - MeanQualityByCycle
-           - CollectBaseDistributionByCycle
-           - CollectGcBiasMetrics
-           - RnaSeqMetrics
-           - CollectSequencingArtifactMetrics
-           - CollectQualityYieldMetrics
+       items: string
+       inputBinding:
+         prefix: "PROGRAM="
+         separate: false
+#       items:  
+#         type: enum
+#         symbols: 
+#           - CollectAlignmentSummaryMetrics
+#           - CollectInsertSizeMetrics
+#           - QualityScoreDistribution
+#           - MeanQualityByCycle
+#           - CollectBaseDistributionByCycle
+#           - CollectGcBiasMetrics
+#           - RnaSeqMetrics
+#           - CollectSequencingArtifactMetrics
+#           - CollectQualityYieldMetrics
     doc: |
       Set of metrics programs to apply during the pass through the SAM file. Default value: [CollectAlignmentSummaryMetrics, CollectSizeMetrics, MeanQualityByCycle, QualityScoreDistribution]. This option can be set to 'null' to clear the default value. Possible values: [CollectAlignmentSummaryMetrics, CollectInsertSizeMetrics, QualityScoreDistribution, MeanQualityByCycle, CollectBaseDistributionByCycle, CollectGcBiasMetrics, RnaSeqMetrics, CollectSequencingArtifactMetrics, CollectQualityYieldMetrics]. This option may be specified 0 or more times. This option can be set to 'null' to clear the default list.
   

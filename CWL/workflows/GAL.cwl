@@ -17,29 +17,34 @@ inputs:
   prefix: string
   
 outputs:
-  AlignmentSummarymetrics:
-    type: File
-    outputSource: picardCollectMultipleMetrics/AlignmentSummarymetrics
 
-  InsertSizemetrics:
-    type: File
-    outputSource: picardCollectMultipleMetrics/InsertSizemetrics 
+  logFiles:
+    type: File[]
+    outputSource: picardCollectMultipleMetrics/summaryFiles
 
-  QualityByCyclemetrics:
-    type: File
-    outputSource: picardCollectMultipleMetrics/QualityByCyclemetrics
+#  AlignmentSummarymetrics:
+#    type: File
+#    outputSource: picardCollectMultipleMetrics/AlignmentSummarymetrics
 
-  QualityDistributionmetrics:
-    type: File
-    outputSource: picardCollectMultipleMetrics/QualityDistributionmetrics
+#  InsertSizemetrics:
+#    type: File
+#    outputSource: picardCollectMultipleMetrics/InsertSizemetrics 
 
-  QualityByCyclemetricsTwo:
-    type: File
-    outputSource: picardCollectMultipleMetrics/QualityByCyclemetricsTwo
+#  QualityByCyclemetrics:
+#    type: File
+#    outputSource: picardCollectMultipleMetrics/QualityByCyclemetrics
 
-  QualityDistributionmetricsTwo:
-    type: File
-    outputSource: picardCollectMultipleMetrics/QualityDistributionmetricsTwo
+#  QualityDistributionmetrics:
+#    type: File
+#    outputSource: picardCollectMultipleMetrics/QualityDistributionmetrics
+
+#  QualityByCyclemetricsTwo:
+#    type: File
+#    outputSource: picardCollectMultipleMetrics/QualityByCyclemetricsTwo
+
+#  QualityDistributionmetricsTwo:
+#    type: File
+#    outputSource: picardCollectMultipleMetrics/QualityDistributionmetricsTwo
 
 steps:
   bwaAln1:
@@ -135,7 +140,7 @@ steps:
       ASSUME_SORTED: 
         valueFrom: $( 1==1 )
       CREATE_INDEX:
-        valueFrom: $( 1==1)
+        valueFrom: $( 1==1 )
       MAX_RECORDS_IN_RAM:
         valueFrom: $( 12500000 )
       src: samtoolsSort/bamFile
@@ -160,12 +165,19 @@ steps:
       OUTPUT:
         valueFrom: $( inputs.name + ".collectMultipleMetrics.txt")
       REFERNCE_SEQUENCE: 
-        valueFrom: $( reference_genome )
+        valueFrom: reference_genome
       ASSUME_SORTED: 
         valueFrom: $( 1==1 )
       VALIDATION_STRINGENCY:
         valueFrom: SILENT
-      PROGRAM:
-        valueFrom: $( [CollectAlignmentSummaryMetrics, CollectInsertSizeMetrics, QualityScoreDistribution, MeanQualityByCycle] )
+      PROGRAMsToRun:
+        valueFrom: $( ["CollectAlignmentSummaryMetrics", "CollectInsertSizeMetrics", "QualityScoreDistribution", "MeanQualityByCycle"] )
       src: [picardMarkDuplicates/METRICS_FILE_output, picardMarkDuplicates/OUTPUT_output]
-    out: [AlignmentSummarymetrics, InsertSizemetrics, QualityByCyclemetrics, QualityDistributionmetrics, QualityByCyclemetricsTwo, QualityDistributionmetricsTwo]
+    out:
+      - summaryFiles 
+#      - AlignmentSummarymetrics
+#      - InsertSizemetrics 
+#      - QualityByCyclemetrics 
+#      - QualityDistributionmetrics
+#      - QualityByCyclemetricsTwo
+#      - QualityDistributionmetricsTwo
