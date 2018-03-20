@@ -19,32 +19,9 @@ inputs:
   
 outputs:
 
-  logFiles:
+  samtoolsViewBamFile:
     type: File
     outputSource: samtoolsView/bamFile
-
-#  AlignmentSummarymetrics:
-#    type: File
-#    outputSource: picardCollectMultipleMetrics/AlignmentSummarymetrics
-
-#  InsertSizemetrics:
-#    type: File
-#    outputSource: picardCollectMultipleMetrics/InsertSizemetrics 
-
-#  QualityByCyclemetrics:
-#    type: File
-#    outputSource: picardCollectMultipleMetrics/QualityByCyclemetrics
-
-#  QualityDistributionmetrics:
-#    type: File
-#    outputSource: picardCollectMultipleMetrics/QualityDistributionmetrics
-
-#  QualityByCyclemetricsTwo:
-#    type: File
-#    outputSource: picardCollectMultipleMetrics/QualityByCyclemetricsTwo
-
-#  QualityDistributionmetricsTwo:
-#    type: File
 
 steps:
   bwaAln1:
