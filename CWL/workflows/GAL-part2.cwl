@@ -1,34 +1,28 @@
 #!/usr/bin/env cwl-runner
 
-cwlVersion "v1.0"
+cwlVersion: v1.0
 
 class: Workflow
 
 requirements:
-  - class:StepInputExpressionRequirement
-  - class: InlineJavascriptRequirement
-  - class: MultipleInputFeatureRequirement
-  - class: SubworkflowFeatureRequirement
+- class: StepInputExpressionRequirement
+- class: InlineJavascriptRequirement
+- class: MultipleInputFeatureRequirement
 
 inputs: 
   bamFile: File
+  outputName: string
 
 outputs:
   logFiles: 
     type: File[]
-    outputSource: picardMarkDuplicates/OUTPUT_output
-
-#requirements:
- # - class:StepInputExpressionRequirement
-  #- class: InlineJavascriptRequirement
- # - class: MultipleInputFeatureRequirement
- # - class: SubworkflowFeatureRequirement
+    outputSource: picardCollectMultipleMetrics/summaryFiles
 
 steps:
   picardMarkDuplicates:
     run: ../tools/bioconda-tool-picard-MarkDuplicates.cwl
     in:
-      INPUT: samtoolsSort/bamFile
+      INPUT: bamFile
       name: outputName
       OUTPUT: 
         valueFrom: $( inputs.name + ".bam" )
@@ -44,7 +38,7 @@ steps:
         valueFrom: $( 1==1 )
       MAX_RECORDS_IN_RAM:
         valueFrom: $( 12500000 )
-      src: samtoolsSort/bamFile
+      src: bamFile
     out: [METRICS_FILE_output, OUTPUT_output]
 
   samtoolsFlagstat:
