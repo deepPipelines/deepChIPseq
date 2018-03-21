@@ -24,12 +24,25 @@ requirements:
   - class: InlineJavascriptRequirement
 
 baseCommand: "plotFingerprint"
-stdout: output.txt
+
 
 outputs:
 
   outputFile:
-    type: stdout
+    type: File
+    inputBinding:
+      glob: $( inputs.plotTitle )
+
+  outputFileQM:
+    type: File
+    inputBinding:
+      glob: $( inputs.outQualityMetrics )
+
+  outputFileRC:
+    type: File
+    inputBinding:
+      glob: $( inputs.outRawCounts )
+
 
 inputs:
   

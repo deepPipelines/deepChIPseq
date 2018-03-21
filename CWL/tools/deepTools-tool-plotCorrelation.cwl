@@ -25,12 +25,14 @@ requirements:
   - class: InlineJavascriptRequirement
 
 baseCommand: ["plotCorrelation"]
-stdout: $( inputs.plotTitle )
+
 
 outputs:
 
   outputFile:
-    type: stdout
+    type: File
+    inputBinding:
+      glob: $( inputs.plotTitle )
 
 
 inputs:

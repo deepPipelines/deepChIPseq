@@ -25,13 +25,14 @@ requirements:
   - class: InlineJavascriptRequirement
 
 baseCommand: "bamCoverage"
-stdout: $( inputs.outFileName )
+
 
 outputs:
 
   outputFile:
-    type: stdout
-
+    type: File
+    inputBinding:
+      glob: $( inputs.outFileName )
 
 inputs:
 

@@ -23,12 +23,14 @@ s:author:
 requirements:
 - class: InlineJavascriptRequirement
 
-stdout: $( inputs.outFileName )
 
 outputs:
 
-  out:
-    type: stdout
+  outputFile:
+    type: File
+    inputBinding:
+      glob: $( inputs.outFileName )
+
 
 inputs:
   

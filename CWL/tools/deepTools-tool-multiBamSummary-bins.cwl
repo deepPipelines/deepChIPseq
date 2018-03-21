@@ -18,12 +18,14 @@ requirements:
   - class: InlineJavascriptRequirement
 
 baseCommand: ["multiBamSummary", "bins"]
-stdout: $( inputs.outFileName )
+
 
 outputs:
 
   outputFile:
-    type: stdout
+    type: File
+    outputBinding:
+      glob: $ ( inputs.outFileName )
 
 inputs:
 

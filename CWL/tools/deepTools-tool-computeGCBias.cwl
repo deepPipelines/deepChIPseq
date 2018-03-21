@@ -23,20 +23,14 @@ s:author:
     s:email: mailto:heleneluessem@gmail.com
     s:name: Helene Luessem
 
-requirements:
-  - class: InlineJavascriptRequirement
-
-
-stdout: $( inputs.GCbiasFrequenciesFile.path )
 
 outputs:
 
-  GCbiasFrequenciesFile_out:
-    type: stdout
+  outputFile:
+    type: File
+    inputBinding:
+      glob: $( inputs.GCbiasFrequenciesFile)
 
-    doc: Path to save the file containing the observed and expected read frequencies per %%GC-content. This file is needed to run the correctGCBias tool. This is a text file.
-    #  outputBinding:
-    #  glob: $(inputs.GCbiasFrequenciesFile.path)
 
 inputs:
   
