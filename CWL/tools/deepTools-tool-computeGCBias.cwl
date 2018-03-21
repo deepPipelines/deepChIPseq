@@ -41,7 +41,7 @@ outputs:
 inputs:
   
   bamfile:
-    type: string
+    type: File
 
     doc: Sorted BAM file. 
     inputBinding:
