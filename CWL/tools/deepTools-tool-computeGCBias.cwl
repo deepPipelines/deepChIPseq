@@ -96,10 +96,7 @@ inputs:
       prefix: --regionSize
 
   numberOfProcessors:
-    type: 
-    - "null"
-    - type: enum
-      symbols: ['max/2', 'max']
+    type: ["null", int]
     inputBinding:
       position: 10
       prefix: -p
