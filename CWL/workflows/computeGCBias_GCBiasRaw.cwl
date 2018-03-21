@@ -46,11 +46,13 @@ steps:
       bamfile: bamFile
       effectiveGenomeSize: genomeSize
       genome: genome
-      sampleSize: 50000000.0
+      sampleSize: 
+        valueFrom: $( 50000000.0 )
       fragmentLength: fragmentLength
       GCbiasFrequenciesFile: gcFreqFile
       biasPlot: biasPlot
-      plotFileFormat: "svg"
+      plotFileFormat: 
+        valueFrom: $( svg )
     out:
       - GCbiasFrequenciesFile_out
       
