@@ -104,7 +104,7 @@ inputs:
       prefix: -bl
 
   numberOfProcessors:
-    type: ["null", string]
+    type: ["null", int]
     doc: Number of processors to use. Type "max/2" to use half the maximum number of processors or "max" to use all available processors.
     inputBinding:
       prefix: -p
