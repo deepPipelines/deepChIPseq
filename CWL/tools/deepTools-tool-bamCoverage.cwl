@@ -36,7 +36,7 @@ outputs:
 inputs:
 
   bam:
-    type: string
+    type: File
 
     doc: BAM file to process
     inputBinding:
