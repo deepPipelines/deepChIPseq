@@ -1,4 +1,4 @@
-clVersion: v1.0
+cwlVersion: v1.0
 class: Workflow
 
 s:author:
@@ -34,10 +34,12 @@ steps:
     run: ../tools/deepTools-tool-bamCoverage.cwl
     in:
       numberOfProcessors: deeptoolsParallel
-      binSize: 25
+      binSize: 
+        valueFrom: $( 25)
       bam: bamFile
       outFileName: outName
-      outFileFormat: bigwig
+      outFileFormat: 
+        valueFrom: bigwig
       normalizeTo1x: normalize
     out:
       - outputFile
