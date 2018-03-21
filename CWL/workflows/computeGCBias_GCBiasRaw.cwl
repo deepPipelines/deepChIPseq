@@ -39,7 +39,7 @@ outputs:
 
 steps:
   
-  generateSignalCovTrack:
+  computeGCBias:
     run: ../tools/deepTools-tool-computeGCBias.cwl
     in:
       numberOfProcessors: deeptoolsParallel
