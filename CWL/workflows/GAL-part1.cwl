@@ -19,9 +19,9 @@ inputs:
   
 outputs:
 
-  samtoolsViewBamFile:
+  samtoolsSortBamFile:
     type: File
-    outputSource: samtoolsView/bamFile
+    outputSource: samtoolsSort/bamFile
 
 steps:
   bwaAln1:
