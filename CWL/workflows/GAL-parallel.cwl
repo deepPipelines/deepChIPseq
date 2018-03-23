@@ -23,6 +23,10 @@ outputs:
     type: File[]
     outputSource: picardCollectMultipleMetrics/summaryFiles
 
+  markDuplicatesBamFile:
+    type: File
+    outputSource: picardMarkDuplicates/OUTPUT_output
+
 steps:
   GAL-part1:
     run: GAL-part1.cwl
