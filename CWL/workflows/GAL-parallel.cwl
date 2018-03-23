@@ -37,12 +37,12 @@ steps:
       outputName: outputName
       prefix: prefix
     out:
-      - samtoolsViewBamFile
+      - samtoolsSortBamFile
  
   picardMarkDuplicates:
     run: ../tools/bioconda-tool-picard-MarkDuplicates.cwl
     in:
-      INPUT: GAL-part1/samtoolsViewBamFile
+      INPUT: GAL-part1/samtoolsSortBamFile
       name: outputName
       OUTPUT: 
         valueFrom: $( inputs.name + ".bam" )
@@ -59,7 +59,7 @@ steps:
       MAX_RECORDS_IN_RAM:
         valueFrom: $( 12500000 )
       src: 
-        - GAL-part1/samtoolsViewBamFile
+        - GAL-part1/samtoolsSortBamFile
     out: [METRICS_FILE_output, OUTPUT_output]
 
   samtoolsFlagstat:

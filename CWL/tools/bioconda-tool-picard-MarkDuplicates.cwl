@@ -150,14 +150,16 @@ inputs:
   INPUT:
     inputBinding:
       position: 5
-      prefix: "INPUT="
-      separate: false
     type:
-      - File
+#      - type: File
+#        inputBinding:
+#          prefix: "INPUT="
+#          separate: false
       - type: array
         items: File
         inputBinding:
-          itemSeparator: " INPUT="
+          prefix: "INPUT="
+          separate: false
     doc: |
        One or more input SAM or BAM files to analyze. Must be coordinate sorted. Default value: null. This option may be specified 0 or more times. 
 

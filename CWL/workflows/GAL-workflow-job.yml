@@ -2,13 +2,13 @@ fq1file:
   - class: File
     path: file_R1.fastq.gz
   - class: File
-    path: file_R1.fastq.gz
+    path: file2_R1.fastq.gz
 
 fq2file:
   - class: File
     path: file_R2.fastq.gz
   - class: File
-    path: file_R2.fastq.gz
+    path: file2_R2.fastq.gz
 
 reference_genome:
   class: File
