@@ -175,10 +175,7 @@ inputs:
       prefix: -bl 
 
   numberOfProcessors:
-    type: 
-    - "null"
-    - type: enum
-      symbols: ['max/2', 'max']
+    type: int
     inputBinding:
       position: 10
       prefix: -p
