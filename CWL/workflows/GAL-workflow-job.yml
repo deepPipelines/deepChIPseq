@@ -16,4 +16,6 @@ reference_genome:
 
 outputName: "bamFile"
 
-prefix: /projects/student/Wiebke/reference/hs37d5_PhiX_Lambda.fa
+prefix: 
+  class: File
+  path: /projects/student/Wiebke/reference/hs37d5_PhiX_Lambda.fa

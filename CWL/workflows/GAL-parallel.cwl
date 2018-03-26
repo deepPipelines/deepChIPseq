@@ -16,7 +16,13 @@ inputs:
   fq2file: File[]
   reference_genome: File
   outputName: string
-  prefix: string
+  prefix: File
+  #secondaryFiles:
+ #  - ".amb"
+ #  - ".ann"
+ #  - ".bwt"
+ #  - ".pac"
+ #  - ".sa"
 
 outputs:
   logFiles:

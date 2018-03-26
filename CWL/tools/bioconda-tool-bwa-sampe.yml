@@ -35,7 +35,13 @@ outputs:
 inputs:
 
   prefix:
-    type: string
+    type: File
+    secondaryFiles: 
+     - ".amb"
+     - ".ann"
+     - ".bwt"
+     - ".pac"
+     - ".sa"
     doc: |
       reference prefix
     inputBinding:
