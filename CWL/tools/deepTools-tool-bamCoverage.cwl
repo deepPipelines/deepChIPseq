@@ -31,7 +31,7 @@ outputs:
 
   outputFile:
     type: File
-    inputBinding:
+    outputBinding:
       glob: $( inputs.outFileName )
 
 inputs:
@@ -99,7 +99,7 @@ inputs:
       prefix: -r
 
   blackListFileName:
-    type: ["null", string]
+    type: ["null", File]
     doc: A BED file containing regions that should be excluded from all analyses. Currently this works by rejecting genomic chunks that happen to overlap an entry. Consequently, for BAM files, if a read partially overlaps a blacklisted region or a fragment spans over it, then the read/fragment might still be considered.
     inputBinding:
       prefix: -bl
