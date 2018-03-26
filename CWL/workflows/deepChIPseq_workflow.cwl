@@ -14,21 +14,45 @@ requirements:
 
 inputs:
 
+#---------- Number of Processors------------------------------------
+
   deeptoolsParallel:
     type: int
 
+
+#---------- Input BamFiles -----------------------------------------
+
+  # Raw bamfiles: GALvX_Histone, GALvX_Input
   bamFilesRaw:
     type: 
-      - type: array
-        items: File
+    - type: array
+      items: File
  
-  outName_generateSignalCovTrack:
+  # Raw bamfiles: GALvX_Histone
+  bamFilesRaw_Histone:
     type:
-      - type: array
-        items: string
+    - type: array
+      items: File
+
+  # Raw bamfiles: GALvX_Input
+  bamFilesRaw_Input:
+    type: File
+
+
+#----------- Step specific parameters ------------------------------
+
+#----------- Step: generateSignalCovTrack --------------------------
 
   normalize:
     type: int
+
+  outName_generateSignalCovTrack:
+    type:
+    - type: array
+      items: string
+
+
+#---------- Step: computeGCBias ------------------------------------
 
   genomeSize:
     type: int
@@ -41,30 +65,46 @@ inputs:
   
   gcFreqFile:
     type:
-      - type: array
-        items: string
+    - type: array
+      items: string
 
   biasPlot:
     type: string
 
-  bamFilesRaw_Histone:
-    type:
-      - type: array
-        items: File
-
-  bamFile2:
-    type: File
-
-  outName_generateLog2FoldChangeTracks:
-    type:
-      - type: array
-        items: string
+#---------- Step: generateLog2FoldChangeTracks ---------------------
 
   scaleFactorsMeth:
     type:
-      - "null"
-      - type: enum
-        symbols: ['readCount', 'SES']
+    - "null"
+    - type: enum
+      symbols: ['readCount', 'SES']
+
+  outName_generateLog2FoldChangeTracks:
+    type:
+    - type: array
+      items: string
+
+
+#---------- Step: computeFingerprintOnRawBam -----------------------
+
+  outName_computeFingerprintOnRawBam_plotFile:
+    type: string
+
+  plotLabels:
+    type:
+    - "null"
+    - type: array
+      items: string
+
+  plotTitle:
+    type: string
+
+  outName_computeFingerprintOnRawBam_QualityMetrics:
+    type: string
+
+  outName_computeFingerprintOnRawBam_RawCounts:
+    type: string
+
 
 
 outputs: []
@@ -117,7 +157,7 @@ steps:
     scatterMethod: dotproduct
     in:
       bamfile1: bamFilesRaw_Histone
-      bamfile2: bamFile2
+      bamfile2: bamFilesRaw_Input
       outFileName: outName_generateLog2FoldChangeTracks
       outFileFormat:
         valueFrom: bigwig
@@ -130,6 +170,23 @@ steps:
       - outputFile
 
 
+  computeFingerprintOnRawBam:
+    run: ../tools/deepTools-tool-plotFingerprint.cwl
+    in: 
+      numberOfProcessors: deeptoolsParallel 
+      bamfiles: bamFilesRaw 
+      plotFile: outName_computeFingerprintOnRawBam_plotFile
+      labels: plotLabels
+      plotTitle: plotTitle 
+      numberOfSamples: 
+        valueFrom: $( 500000 )
+      plotFileFormat:
+        valueFrom: svg
+      outQualityMetrics: outName_computeFingerprintOnRawBam_QualityMetrics
+      JSDsample: bamFilesRaw_Input
+      outRawCounts: outName_computeFingerprintOnRawBam_RawCounts 
+    out:
+      - outputFile
 
 $namespaces:
   s: https://schema.org/
