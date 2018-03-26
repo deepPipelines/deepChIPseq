@@ -27,16 +27,22 @@ inputs:
     type: 
     - type: array
       items: File
- 
+    secondaryFiles:
+      - "^.bai"
+
   # Raw bamfiles: GALvX_Histone
   bamFilesRaw_Histone:
     type:
     - type: array
       items: File
+    secondaryFiles:
+      - "^.bai"
 
   # Raw bamfiles: GALvX_Input
   bamFilesRaw_Input:
     type: File
+    secondaryFiles:
+      - "^.bai"
 
 
 #----------- Step specific parameters ------------------------------
