@@ -221,6 +221,19 @@ steps:
     out:
       - outputBamFile
 
+
+  countReads:
+    run: ../tools/bioconda-tool-sambamba-view.cwl
+    scatter: [inputFile]
+    scatterMethod: dotproduct
+    in:
+      count:
+        valueFrom: $( 1==1 )
+      inputFile: filterBamFiles/outputBamFile
+    out: 
+      - outputBamFile
+
+
 $namespaces:
   s: https://schema.org/
   edam: http://edamontology.org/
