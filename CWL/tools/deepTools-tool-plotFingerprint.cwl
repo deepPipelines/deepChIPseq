@@ -63,7 +63,7 @@ inputs:
       prefix: -plot 
 
   outRawCounts:
-    type: ["null", File]
+    type: ["null", string]
     doc: Output file name to save the read counts per bin.
     inputBinding:
       prefix: --outRawCounts 
