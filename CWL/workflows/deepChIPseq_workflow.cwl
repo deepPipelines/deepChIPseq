@@ -112,6 +112,17 @@ inputs:
     type: string
 
 
+#---------- Step: filterBamFiles -----------------------------------
+
+  outName_filterBamFiles:
+    type: 
+    - "null"
+    - type: array
+      items: string
+
+#---------- 
+
+
 
 outputs: []
 
@@ -193,6 +204,22 @@ steps:
       outRawCounts: outName_computeFingerprintOnRawBam_RawCounts 
     out:
       - outputFile
+
+
+  filterBamFiles:
+    run: ../tools/bioconda-tool-sambamba-view.cwl
+    scatter: [inputFile, outputFileName]
+    scatterMethod: dotproduct
+    in:
+      format:
+        valueFrom: bam 
+      nThreads: deeptoolsParallel 
+      outputFileName: outName_filterBamFiles
+      filter:
+        valueFrom: $( "not (duplicate or unmapped or failed_quality_control or supplementary or secondary_alignment) and mapping_quality >= 5" )
+      inputFile: bamFilesRaw
+    out:
+      - outputBamFile
 
 $namespaces:
   s: https://schema.org/
