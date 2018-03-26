@@ -30,17 +30,17 @@ outputs:
 
   outputFile:
     type: File
-    inputBinding:
+    outputBinding:
       glob: $( inputs.plotTitle )
 
   outputFileQM:
     type: File
-    inputBinding:
+    outputBinding:
       glob: $( inputs.outQualityMetrics )
 
   outputFileRC:
     type: File
-    inputBinding:
+    outputBinding:
       glob: $( inputs.outRawCounts )
 
 
@@ -56,7 +56,7 @@ inputs:
       prefix: -b 
 
   plotFile:
-    type: File?
+    type: string?
 
     doc: File name of the output figure. The file ending will be used to determine the image format. The available options are typically - "png", "eps", "pdf" and "svg", e.g. - fingerprint.png.
     inputBinding:
@@ -149,6 +149,18 @@ inputs:
     doc: If set, then regions with zero overlapping readsfor *all* given BAM files are ignored. This will result in a reduced number of read counts than that specified in --numberOfSamples
     inputBinding:
       prefix: --skipZeros 
+
+  outQualityMetrics:
+    type: ["null", string]
+    doc: Quality metrics can optionally be output to this file. The file will have one row per input BAM file and columns containing a number of metrics. (default None)
+    inputBinding:
+      prefix: --outQualityMetrics
+
+  JSDsample:
+    type: ["null", File]
+    doc: Reference sample against which to compute the Jensen-Shannon distance and the CHANCE statistics. If this is not specified, then these will not be calculated. If --outQualityMetrics is not specified then this will be ignored. The Jensen-Shannon implementation is based on code from Sitanshu Gakkhar at BCGSC. The CHANCE implementation is based on code from Matthias Haimel. (default None)
+    inputBinding:
+      prefix: --JSDsample
 
   region:
     type: ["null", string]
