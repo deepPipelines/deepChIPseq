@@ -49,7 +49,7 @@ inputs:
 
 #----------- Step: generateSignalCovTrack --------------------------
 
-  normalize:
+  genomeSize1:
     type: int
 
   outName_generateSignalCovTrack:
@@ -60,7 +60,7 @@ inputs:
 
 #---------- Step: computeGCBias ------------------------------------
 
-  genomeSize:
+  genomeSize2:
     type: int
 
   genome:
@@ -120,8 +120,19 @@ inputs:
     - type: array
       items: string
 
-#---------- 
+#---------- Step: generateCoverageForFilteredBam -------------------
 
+  outName_generateCoverageForFilteredBam:
+    type:
+    - "null"
+    - type: array
+      items: string
+
+  genomeSize3:
+    type: int
+  
+  blacklistRegions:
+    type: File
 
 
 outputs: []
@@ -143,7 +154,7 @@ steps:
       outFileName: outName_generateSignalCovTrack
       outFileFormat: 
         valueFrom: bigwig
-      normalizeTo1x: normalize
+      normalizeTo1x: genomeSize1
     out:
       - outputFile
 
@@ -155,7 +166,7 @@ steps:
     in:
       numberOfProcessors: deeptoolsParallel
       bamfile: bamFilesRaw
-      effectiveGenomeSize: genomeSize
+      effectiveGenomeSize: genomeSize2
       genome: genome
       sampleSize:
         valueFrom: $( 50000000.0 )
@@ -222,7 +233,7 @@ steps:
       - outputBamFile
 
 
-  countReads:
+  countReadsInFilteredBam:
     run: ../tools/bioconda-tool-sambamba-view.cwl
     scatter: [inputFile]
     scatterMethod: dotproduct
@@ -232,6 +243,26 @@ steps:
       inputFile: filterBamFiles/outputBamFile
     out: 
       - outputBamFile
+
+
+  generateCoverageForFilteredBam:
+    run: ../tools/deepTools-tool-bamCoverage.cwl
+    scatter: [bam, outFileName]
+    scatterMethod: dotproduct
+    in:
+      numberOfProcessors: deeptoolsParallel 
+      binSize:
+        valueFrom: $( 25 ) 
+      bam: filterBamFiles/outputBamFile 
+      outFileName: outName_generateCoverageForFilteredBam
+      outFileFormat:
+        valueFrom:  bigwig
+      normalizeTo1x: genomeSize3 
+      blackListFileName: blacklistRegions 
+      ignoreForNormalization:
+        valueFrom:  $( ["chrX", "chrY", "chrM", "X", "Y", "M", "MT"] )
+    out:
+      - outputFile
 
 
 $namespaces:
