@@ -61,8 +61,9 @@ inputs:
       prefix: "-6"
 
 outputs:
-  - id: output
-    type: File
+ # - id: output
+  index:
+    type: File[]
     secondaryFiles: 
       - ".amb"
       - ".ann"
