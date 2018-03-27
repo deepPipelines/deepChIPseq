@@ -16,22 +16,23 @@ inputs:
 
 #---------- Number of Processors------------------------------------
 
-  deeptoolsParallel:
-    type: int
+  deeptoolsParallel: int
+
+  sambambaParallel : int
 
 
-#---------- Input BamFiles -----------------------------------------
+#---------- Input BamFiles and Prefixes ----------------------------
 
-  # Raw bamfiles: GALvX_Histone, GALvX_Input
-  bamFilesRaw:
+  # Raw bamfiles narrow GALvX_Histone
+  bamFilesRaw_Histone_narrow:
     type: 
     - type: array
       items: File
     secondaryFiles:
       - "^.bai"
 
-  # Raw bamfiles: GALvX_Histone
-  bamFilesRaw_Histone:
+  # Raw bamfiles broad GALvX_Histone
+  bamFilesRaw_Histone_broad:
     type:
     - type: array
       items: File
@@ -43,41 +44,42 @@ inputs:
     type: File
     secondaryFiles:
       - "^.bai"
-
-
-#----------- Step specific parameters ------------------------------
-
-#----------- Step: generateSignalCovTrack --------------------------
-
-  genomeSize1:
-    type: int
-
-  outName_generateSignalCovTrack:
-    type:
-    - type: array
-      items: string
-
-
-#---------- Step: computeGCBias ------------------------------------
-
-  genomeSize2:
-    type: int
-
-  genome:
-    type: File
-
-  fragmentLength:
-    type: int
   
-  gcFreqFile:
-    type:
-    - type: array
-      items: string
+  # Like <DEEPID.PROC.DATE.ASSM.HistoneID>
+  prefix_narrow: string[] 
+  prefix_broad: string[]
+  prefix_input: string
 
-  biasPlot:
-    type: string
+  # Like <DEEPID.PROC.DATE.ASSM>
+  filePrefix: string
 
-#---------- Step: generateLog2FoldChangeTracks ---------------------
+#---------- Genome size --------------------------------------------
+
+  genomeSize: int
+
+
+#---------- Step specific parameters -------------------------------
+
+#---------- Step 1: generateSignalCovTrack -------------------------
+#---------- Step 2: computeGCBias ----------------------------------
+#---------- Step 3: generateLog2FoldChangeTracks -------------------
+#---------- Step 4: computeFingerprintOnRawBam ---------------------
+#---------- Step 5: filterBamFiles ---------------------------------
+#---------- Step 6: countReadsInFilteredBam ------------------------
+#---------- Step 7: generateCoverageForFilteredBam -----------------
+#---------- Step 8: computeFingerprintForFilteredBam ---------------
+#---------- Step 9: peakCallOnFilteredBam --------------------------
+
+
+
+#---------- Step 2: computeGCBias ----------------------------------
+
+  genome: File
+
+  fragmentLength_computeGCBias: int[]
+  
+
+#---------- Step 3: generateLog2FoldChangeTracks -------------------
 
   scaleFactorsMeth:
     type:
@@ -85,54 +87,37 @@ inputs:
     - type: enum
       symbols: ['readCount', 'SES']
 
-  outName_generateLog2FoldChangeTracks:
-    type:
-    - type: array
-      items: string
 
+#---------- Step 4: computeFingerprintOnRawBam ---------------------
 
-#---------- Step: computeFingerprintOnRawBam -----------------------
-
-  outName_computeFingerprintOnRawBam_plotFile:
-    type: string
-
-  plotLabels:
+  outName_computeFingerprintOnRawBam_labels:
     type:
     - "null"
     - type: array
       items: string
 
-  plotTitle:
-    type: string
-
-  outName_computeFingerprintOnRawBam_QualityMetrics:
-    type: string
-
-  outName_computeFingerprintOnRawBam_RawCounts:
+  plotTitle_computeFingerprintOnRawBam:
     type: string
 
 
-#---------- Step: filterBamFiles -----------------------------------
+#---------- Step 7: generateCoverageForFilteredBam -----------------
 
-  outName_filterBamFiles:
-    type: 
-    - "null"
-    - type: array
-      items: string
-
-#---------- Step: generateCoverageForFilteredBam -------------------
-
-  outName_generateCoverageForFilteredBam:
-    type:
-    - "null"
-    - type: array
-      items: string
-
-  genomeSize3:
-    type: int
-  
   blacklistRegions:
     type: File
+
+
+#---------- Step 8: computeFingerprintForFilteredBam ---------------
+
+  outName_computeFingerprintForFilteredBam_labels: string[]
+
+  plotTitle_computeFingerprintForFilteredBam: string
+
+
+#---------- Step 9: peakCallOnFilteredBam --------------------------
+
+  prefix_peakCallOnFilteredBam: string
+
+  fragmentLength_peakCallOnFilteredBam: int[]
 
 
 outputs: []
@@ -142,6 +127,9 @@ outputs: []
 
 steps:
   
+
+#----------- Step 1: generateSignalCovTrack --------------------------
+
   generateSignalCovTrack:
     run: ../tools/deepTools-tool-bamCoverage.cwl
     scatter: [bam, outFileName]
@@ -150,43 +138,72 @@ steps:
       numberOfProcessors: deeptoolsParallel
       binSize: 
         valueFrom: $( 25)
-      bam: bamFilesRaw
-      outFileName: outName_generateSignalCovTrack
+      bam:
+        valueFrom: $(input.narrowBam.concat(input.broadBam).concat(input.inputBam))
+      outFileName:
+        valueFrom: $( input.narrowPrefix.concat(input.broadPrefix).concat(input.inputPrefix).map(function(e) {return e + ".raw.bamcov"}) )
       outFileFormat: 
         valueFrom: bigwig
-      normalizeTo1x: genomeSize1
+      normalizeTo1x: genomeSize
+      
+      # ~Additional inputs~
+      narrowBam: bamFilesRaw_Histone_narrow
+      broadBam: bamFilesRaw_Histone_broad
+      inputBam: bamFilesRaw_Input
+      narrowPrefix: prefix_narrow
+      broadPrefix: prefix_broad
+      inputPrefix: prefix_input
+
     out:
       - outputFile
 
+
+#---------- Step 2: computeGCBias ------------------------------------
 
   computeGCBias:
     run: ../tools/deepTools-tool-computeGCBias.cwl
-    scatter: [bamfile, GCbiasFrequenciesFile]
+    scatter: [bamfile, GCbiasFrequenciesFile, fragmentLength]
     scatterMethod: dotproduct
     in:
       numberOfProcessors: deeptoolsParallel
-      bamfile: bamFilesRaw
-      effectiveGenomeSize: genomeSize2
+      bamfile:
+        valueFrom: $(input.narrowBam.concat(input.broadBam).concat(input.inputBam))
+      effectiveGenomeSize: genomeSize
       genome: genome
       sampleSize:
         valueFrom: $( 50000000.0 )
-      fragmentLength: fragmentLength
-      GCbiasFrequenciesFile: gcFreqFile
-      biasPlot: biasPlot
+      fragmentLength: fragmentLength_computeGCBias
+      GCbiasFrequenciesFile: 
+        valueFrom: $( input.narrowPrefix.concat(input.broadPrefix).concat(input.inputPrefix).map(function(e) {return e + ".gcfreq"}) )
+      biasPlot:
+        valueFrom: $( input.narrowPrefix.concat(input.broadPrefix).concat(input.inputPrefix).map(function(e) {return e + ".gcbias"}) )
       plotFileFormat:
         valueFrom: $( svg )
+
+      # ~Additional inputs~
+      narrowBam: bamFilesRaw_Histone_narrow
+      broadBam: bamFilesRaw_Histone_broad
+      inputBam: bamFilesRaw_Input
+      narrowPrefix: prefix_narrow
+      broadPrefix: prefix_broad
+      inputPrefix: prefix_input
+
     out:
       - outputFile
 
+
+#---------- Step 3: generateLog2FoldChangeTracks ---------------------
 
   generateLog2FoldChangeTracks:
     run: ../tools/deepTools-tool-bamCompare.cwl
     scatter: [bamfile1, outFileName]
     scatterMethod: dotproduct
     in:
-      bamfile1: bamFilesRaw_Histone
+      bamfile1: 
+        valueFrom: $(input.narrowBam.concat(input.broadBam))
       bamfile2: bamFilesRaw_Input
-      outFileName: outName_generateLog2FoldChangeTracks
+      outFileName:
+        valueFrom: $( input.narrowPrefix.concat(input.broadPrefix).map(function(e) {return e + ".log2-Input"}) )
       outFileFormat:
         valueFrom: bigwig
       scaleFactorsMethod: scaleFactorsMeth
@@ -194,28 +211,52 @@ steps:
         valueFrom: log2
       binSize:
         valueFrom: $( 25 )
+
+      # ~Additional inputs~
+      narrowBam: bamFilesRaw_Histone_narrow
+      broadBam: bamFilesRaw_Histone_broad
+      narrowPrefix: prefix_narrow
+      broadPrefix: prefix_broad
+
     out:
       - outputFile
 
+
+#---------- Step 4: computeFingerprintOnRawBam -----------------------
 
   computeFingerprintOnRawBam:
     run: ../tools/deepTools-tool-plotFingerprint.cwl
     in: 
       numberOfProcessors: deeptoolsParallel 
-      bamfiles: bamFilesRaw 
-      plotFile: outName_computeFingerprintOnRawBam_plotFile
-      labels: plotLabels
-      plotTitle: plotTitle 
+      bamfiles:
+        valueFrom: $(input.narrowBam.concat(input.broadBam).concat(input.inputBam))
+      plotFile:
+        valueFrom: $( input.filePrefix.map(function(e) {return e + ".fgpr"}) )
+      labels: outName_computeFingerprintOnRawBam_labels
+      plotTitle: plotTitle_computeFingerprintOnRawBam
       numberOfSamples: 
         valueFrom: $( 500000 )
       plotFileFormat:
         valueFrom: svg
-      outQualityMetrics: outName_computeFingerprintOnRawBam_QualityMetrics
+      outQualityMetrics: 
+        valueFrom: $( input.narrowPrefix.concat(input.broadPrefix).concat(input.inputPrefix).map(function(e) {return e + ".qm-fgpr"}) )
       JSDsample: bamFilesRaw_Input
-      outRawCounts: outName_computeFingerprintOnRawBam_RawCounts 
+      outRawCounts: 
+        valueFrom: $( input.narrowPrefix.concat(input.broadPrefix).concat(input.inputPrefix).map(function(e) {return e + ".counts-fgpr"}) )
+
+      # ~Additional inputs~
+      narrowBam: bamFilesRaw_Histone_narrow
+      broadBam: bamFilesRaw_Histone_broad
+      inputBam: bamFilesRaw_Input
+      narrowPrefix: prefix_narrow
+      broadPrefix: prefix_broad
+      inputPrefix: prefix_input
+
     out:
       - outputFile
 
+
+#---------- Step 5: filterBamFiles ---------------------------------
 
   filterBamFiles:
     run: ../tools/bioconda-tool-sambamba-view.cwl
@@ -224,26 +265,48 @@ steps:
     in:
       format:
         valueFrom: bam 
-      nThreads: deeptoolsParallel 
-      outputFileName: outName_filterBamFiles
+      nThreads: sambambaParallel 
+      outputFileName: 
+        valueFrom: $( input.narrowPrefix.concat(input.broadPrefix).concat(input.inputPrefix).map(function(e) {return e + ".tmp.filt.bam"}) )
       filter:
         valueFrom: $( "not (duplicate or unmapped or failed_quality_control or supplementary or secondary_alignment) and mapping_quality >= 5" )
-      inputFile: bamFilesRaw
+      inputFile: 
+        valueFrom: $(input.narrowBam.concat(input.broadBam).concat(input.inputBam))
+
+      # ~Additional inputs~
+      narrowBam: bamFilesRaw_Histone_narrow
+      broadBam: bamFilesRaw_Histone_broad
+      inputBam: bamFilesRaw_Input
+      narrowPrefix: prefix_narrow
+      broadPrefix: prefix_broad
+      inputPrefix: prefix_input
+
     out:
       - outputBamFile
 
 
+#---------- Step 6: countReadsInFilteredBam -------------------.....
+
   countReadsInFilteredBam:
     run: ../tools/bioconda-tool-sambamba-view.cwl
     scatter: [inputFile]
-    scatterMethod: dotproduct
     in:
       count:
         valueFrom: $( 1==1 )
       inputFile: filterBamFiles/outputBamFile
+      outputFileName:
+        valueFrom: $( input.narrowPrefix.concat(input.broadPrefix).concat(input.inputPrefix).map(function(e) {return e + ".mapped.readcount"}) )
+
+      # ~Additional inputs~
+      narrowPrefix: prefix_narrow
+      broadPrefix: prefix_broad
+      inputPrefix: prefix_input
+
     out: 
       - outputBamFile
 
+
+#---------- Step 7: generateCoverageForFilteredBam -----------------
 
   generateCoverageForFilteredBam:
     run: ../tools/deepTools-tool-bamCoverage.cwl
@@ -254,15 +317,96 @@ steps:
       binSize:
         valueFrom: $( 25 ) 
       bam: filterBamFiles/outputBamFile 
-      outFileName: outName_generateCoverageForFilteredBam
+      outFileName: 
+        valueFrom: $( input.narrowPrefix.concat(input.broadPrefix).concat(input.inputPrefix).map(function(e) {return e + ".filt.bamcov"}) )
       outFileFormat:
         valueFrom:  bigwig
-      normalizeTo1x: genomeSize3 
+      normalizeTo1x: genomeSize 
       blackListFileName: blacklistRegions 
       ignoreForNormalization:
         valueFrom:  $( ["chrX", "chrY", "chrM", "X", "Y", "M", "MT"] )
+
+      # ~Additional inputs~
+      narrowPrefix: prefix_narrow
+      broadPrefix: prefix_broad
+      inputPrefix: prefix_input
+
     out:
       - outputFile
+
+
+#---------- Step 8: computeFingerprintForFilteredBam ---------------
+
+  computeFingerprintForFilteredBam:
+    run: ../tools/deepTools-tool-plotFingerprint.cwl
+    in:
+      numberOfProcessors: deeptoolsParallel
+      bamfiles: filterBamFiles/outputBamFile
+      plotFile:
+        valueFrom: $( input.filePrefix.map(function(e) {return e + ".tmp.filt.fgpr"}) )
+      labels: outName_computeFingerprintForFilteredBam_labels
+      plotTitle: plotTitle_computeFingerprintForFilteredBam 
+      numberOfSamples:
+        valueFrom: $( 500000 )
+      plotFileFormat:
+       valueFrom: svg
+      outQualityMetrics:
+        valueFrom: $( input.narrowPrefix.concat(input.broadPrefix).concat(input.inputPrefix).map(function(e) {return e + ".tmp.filt.qm-fgpr.tmp"}) )
+      JSDsample:        
+        valueFrom: $( input.inputPrefix.map(function(e) {return e + ".tmp.filt.bam"}) )
+      outRawCounts:
+        valueFrom: $( input.narrowPrefix.concat(input.broadPrefix).concat(input.inputPrefix).map(function(e) {return e + ".tmp.filt.counts-fgpr"}) )
+
+      # ~Additional inputs~
+      narrowPrefix: prefix_narrow
+      broadPrefix: prefix_broad
+      inputPrefix: prefix_input
+
+    out:
+      - outputFile
+
+
+#---------- Step 9: peakCallOnFilteredBam --------------------------
+
+  peakCallOnFilteredBam:
+    run: ../tools/bioconda-tool-macs2-callpeak.cwl
+    scatter: [tFile, name, extSize]
+    scatterMethod: dotproduct
+    in:
+      tFile: 
+        valueFrom: $( input.narrowPrefix.concat(input.broadPrefix).map(function(e) {return e + ".tmp.filt.bam"}) )
+      cFile: 
+        valueFrom: $( input.inputPrefix.map(function(e) {return e + ".tmp.filt.bam"}) )
+      format:
+        valueFrom: BAM 
+      gSize: genomeSize
+      keepDup: 
+        valueFrom: $( "all" )
+      name: 
+        valueFrom: $( input.narrowPrefix.concat(input.broadPrefix).map(function(e) {return e + ".tmp.filt.bam_" + input.prefix_peakCallOnFilteredBam}) )
+      noModel:
+        valueFrom: $( 1==1 ) 
+      extSize: fragmentLength_peakCallOnFilteredBam
+      qValue:
+        valueFrom: $( 0.05 ) 
+     
+      # ~Additional inputs~
+      narrowPrefix: prefix_narrow
+      broadPrefix: prefix_broad
+      inputPrefix: prefix_input
+
+    out:
+      - outputBamFile
+
+
+
+
+
+
+
+
+
+
 
 
 $namespaces:
@@ -272,4 +416,3 @@ $namespaces:
 $schemas:
   - https://schema.org/docs/schema_org_rdfa.html
   - http://edamontology.org/EDAM_1.18.owl
-
