@@ -12,6 +12,8 @@ s:author:
 
 requirements:
   - class: InlineJavascriptRequirement
+  - class: InitialWorkDirRequirement
+    listing: input
 
 hints:
   - class: ResourceRequirement
@@ -62,14 +64,16 @@ inputs:
 
 outputs:
  # - id: output
-  index:
-    type: File[]
-    secondaryFiles: 
-      - ".amb"
-      - ".ann"
-      - ".bwt"
-      - ".pac"
-      - ".sa"
+#  index:
+#    type: File
+#    outputBinding:
+#      glob: $( inputs.input )
+#    secondaryFiles: 
+#      - ".amb"
+#      - ".ann"
+#      - ".bwt"
+#      - ".pac"
+#      - ".sa"
   #  type: { type: array, items: File }
   #  outputBinding:
   #    glob:
