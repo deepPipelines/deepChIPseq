@@ -60,7 +60,7 @@ inputs:
 
 #---------- Step specific parameters -------------------------------
 
-#---------- Step 1: generateSignalCovTrack -------------------------
+
 #---------- Step 2: computeGCBias ----------------------------------
 #---------- Step 3: generateLog2FoldChangeTracks -------------------
 #---------- Step 4: computeFingerprintOnRawBam ---------------------
@@ -68,8 +68,20 @@ inputs:
 #---------- Step 6: countReadsInFilteredBam ------------------------
 #---------- Step 7: generateCoverageForFilteredBam -----------------
 #---------- Step 8: computeFingerprintForFilteredBam ---------------
-#---------- Step 9: peakCallOnFilteredBam --------------------------
-
+#---------- Step 9.1: peakCallOnFilteredBam - narrow ---------------
+#---------- Step 9.2: peakCallOnFilteredBam - broad- ---------------
+#---------- Step 10.1: zipMacsFiles - narrow -----------------------
+#---------- Step 10.2: zipMacsFiles - broad ------------------------
+#---------- Step 11: histoneHMM ------------------------------------
+#---------- Step 12: makeHistoneHMMBedLike -------------------------
+#---------- Step 13: zipSecHistoneHMMFiles -------------------------
+#---------- Step 14: CountReadsOverlappingPeakRegions --------------
+#---------- Step 15: IntersectPeakFiles ----------------------------
+#---------- Step 16: IntersectHistoneHMMFiles ----------------------
+#---------- Step 17: flagAndStandardizePeaks -----------------------
+#---------- Step 18: RestrictFilteredBAMstoAutosomalRegions --------
+#---------- Step 19: CreateDataMatrixForCorrelationPlot ------------
+#---------- Step 20: createHeatmapCorrelationPlot ------------------
 
 
 #---------- Step 2: computeGCBias ----------------------------------
@@ -366,15 +378,15 @@ steps:
       - outputFile
 
 
-#---------- Step 9: peakCallOnFilteredBam --------------------------
+#---------- Step 9.1: peakCallOnFilteredBam - narrow ---------------
 
-  peakCallOnFilteredBam:
+  peakCallOnFilteredBamN:
     run: ../tools/bioconda-tool-macs2-callpeak.cwl
     scatter: [tFile, name, extSize]
     scatterMethod: dotproduct
     in:
       tFile: 
-        valueFrom: $( input.narrowPrefix.concat(input.broadPrefix).map(function(e) {return e + ".tmp.filt.bam"}) )
+       valueFrom: $( input.narrowPrefix.map(function(e) {return e + ".tmp.filt.bam"}) )
       cFile: 
         valueFrom: $( input.inputPrefix.map(function(e) {return e + ".tmp.filt.bam"}) )
       format:
@@ -383,7 +395,7 @@ steps:
       keepDup: 
         valueFrom: $( "all" )
       name: 
-        valueFrom: $( input.narrowPrefix.concat(input.broadPrefix).map(function(e) {return e + ".tmp.filt.bam_" + input.prefix_peakCallOnFilteredBam}) )
+        valueFrom: $( input.narrowPrefix.map(function(e) {return e + ".tmp.filt.bam_" + input.pre}) )
       noModel:
         valueFrom: $( 1==1 ) 
       extSize: fragmentLength_peakCallOnFilteredBam
@@ -392,20 +404,130 @@ steps:
      
       # ~Additional inputs~
       narrowPrefix: prefix_narrow
-      broadPrefix: prefix_broad
       inputPrefix: prefix_input
+      pre: prefix_peakCallOnFilteredBam
 
     out:
       - outputBamFile
 
 
+#---------- Step 9.2: peakCallOnFilteredBam - broad ----------------
+
+  peakCallOnFilteredBamB:
+    run: ../tools/bioconda-tool-macs2-callpeak.cwl
+    scatter: [tFile, name, extSize]
+    scatterMethod: dotproduct
+    in:
+      tFile:
+        valueFrom: $( input.broadPrefix.map(function(e) {return e + ".tmp.filt.bam"}) )
+      cFile:
+        valueFrom: $( input.inputPrefix.map(function(e) {return e + ".tmp.filt.bam"}) )
+      format:
+        valueFrom: BAM
+      gSize: genomeSize
+      keepDup:
+        valueFrom: $( "all" )
+      name:
+        valueFrom: $( input.broadPrefix.map(function(e) {return e + ".tmp.filt.bam_" + input.pre}) )
+      noModel:
+        valueFrom: $( 1==1 )
+      extSize: fragmentLength_peakCallOnFilteredBam
+      qValue:
+        valueFrom: $( 0.05 )
+      broad: 
+        valueFrom: $( 1==1 )
+
+      # ~Additional inputs~
+      broadPrefix: prefix_broad
+      inputPrefix: prefix_input
+      pre: prefix_peakCallOnFilteredBam
+
+    out:
+      - outputBamFile
 
 
+#---------- Step 10.1: zipMacsFiles - narrow -----------------------
+#
+#  zipMacsFilesN:
+#    run: ../tools/localfile-tool-zipMacsFiles.cwl
+#    scatter: [inputFile1, inputFile2, inputFile3, outname]
+#    scatterMethod: dotproduct
+#    in:
+#      inputFile1:
+#        valueFrom: $( input.narrowPrefix.map(function(e) {return e + ".tmp.filt.bam_" + input.pre + "_peaks.narrowPeak"}) )
+#      inputFile2:
+#        valueFrom: $( input.narrowPrefix.map(function(e) {return e + ".tmp.filt.bam_" + input.pre + "_peaks.xls"}) )
+#      inputFile3:
+#        valueFrom: $( input.narrowPrefix.map(function(e) {return e + ".tmp.filt.bam_" + input.pre + "_summits.bed"}) )
+#      outname:
+#         valueFrom: $( input.inPrefix.map(function(e) {return e + ".macs.out"}) )
+# 
+#      # ~Additional Inputs~
+#      narrowPrefix: prefix_narrow
+#      pre: prefix_peakCallOnFilteredBam
+#      inPrefix: prefix_narrow
+#  out:
+#   - outZipFile
 
 
+#---------- Step 10.2: zipMacsFiles - broad ------------------------
+
+#  zipMacsFilesB:
+#    run: ../tools/localfile-tool-zipMacsFiles.cwl
+#    scatter: [arg1, arg2, arg3, outname]
+#    scatterMethod: dotproduct
+#    in:
+#      inputFile1:
+#        valueFrom: $( input.broadPrefix.map(function(e) {return e + ".tmp.filt.bam_" + input.pre + "_peaks.broadPeak"}) )
+#      inputFile2:
+#        valueFrom: $( input.broadPrefix.map(function(e) {return e + ".tmp.filt.bam_" + input.pre + "_peaks.xls"}) )
+#      inpputFile3:
+#        valueFrom: $( input.broadPrefix.map(function(e) {return e + ".tmp.filt.bam_" + input.pre + "_peaks.gappedPeak"}) )
+#      outname:
+#         valueFrom: $( input.inPrefix.map(function(e) {return e + ".macs.out"}) )
+#
+#      # ~Additional Inputs~
+#      narrowPrefix: prefix_narrow
+#      pre: prefix_peakCallOnFilteredBam
+#      inPrefix: prefix_broad
+#  out:
+#    outZipFile
 
 
+#---------- Step 11: histoneHMM ------------------------------------
 
+#---------- Step 12: makeHistoneHMMBedLike -------------------------
+
+#---------- Step 13: zipSecHistoneHMMFiles -------------------------
+
+#---------- Step 14: countReadsOverlappingPeakRegions --------------
+
+  countReadsOverlappingPeakRegions:
+    run: ../tools/bioconda-tool-sambamba-view.cwl
+    scatter: [inputFile]
+    scatterMethod: dotproduct
+    in:
+      count: 
+        valueFrom: $( 1==1 )
+      nThreads: sambambaParallel
+      regions: 
+        valueFrom: $( (input.narrowPrefix.map(function(e) {return e + ".tmp.filt.bam_" + input.pre + "_peaks.narrowPeak"})).concat(input.broadPrefix.map(function(e) {return e + ".tmp.filt.bam_" + input.pre + "_peaks.broadPeak"})) )
+      inputFile: filterBamFiles/outputBamFile
+    out:
+      - outputBamFile
+
+
+#---------- Step 15: intersectPeakFiles ----------------------------
+
+#---------- Step 16: intersectHistoneHMMFiles ----------------------
+
+#---------- Step 17: flagAndStandardizePeaks -----------------------
+
+#---------- Step 18: restrictFilteredBAMstoAutosomalRegions --------
+
+#---------- Step 19: createDataMatrixForCorrelationPlot ------------
+
+#---------- Step 20: createHeatmapCorrelationPlot ------------------
 
 
 
