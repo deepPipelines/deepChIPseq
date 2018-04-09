@@ -134,9 +134,21 @@ inputs:
   fragmentLength_peakCallOnFilteredBam: int[]
 
 
-#---------- Step 17: flagAndStandardizePeaks -----------------------
+#---------- Step 18: restrictFilteredBAMstoAutosomalRegions --------
 
   autosomeRegions: File
+
+
+#---------- Step 19: createDataMatrixForCorrelationPlot ------------
+
+  outName_createDataMatrixForCorrelationPlot_labels:
+    - "null"
+    - type: array
+      items: string
+
+
+#---------- Step 20: createHeatmapCorrelationPlot ------------------
+
 
 
 outputs: []
@@ -568,7 +580,11 @@ steps:
 
 #---------- Step 17: flagAndStandardizePeaks -----------------------
 
-  flagAndStandardizePeaks:
+# TODO
+
+#---------- Step 18: restrictFilteredBAMstoAutosomalRegions --------
+
+  restrictFilteredBAMstoAutosomalRegions:
     run: ../tools/bioconda-tool-sambamba-view.cwl
     scatter: [outputFilename, inputFile]
     scatterMethod: dotproduct
@@ -587,9 +603,27 @@ steps:
       - outputBamFile
 
 
-#---------- Step 18: restrictFilteredBAMstoAutosomalRegions --------
-
 #---------- Step 19: createDataMatrixForCorrelationPlot ------------
+
+  createDataMatrixForCorrelationPlot:
+    run: ../tools/deepTools-tool-multiBamSummary-bins.cwl
+    in:
+      numberOfProcessors:
+        valueFrom: $( 8 )
+      bamfiles: restrictFilteredBAMstoAutosomalRegions/outputBamFile 
+      outFileName:
+        valueFrom: $( input.filePrefix.map(function(e) {return e + ".auto.summ"}) )
+      labels: outName_createDataMatrixForCorrelationPlot_labels
+      binSize:
+        valueFrom: $( 1000 )
+      distanceBetweenBins:
+        valueFrom: $( 2000 )
+      blackListFileName: blacklistRegions
+      outRawCounts: 
+        valueFrom: $( input.filePrefix.map(function(e) {return e + ".auto.counts-summ"}) )
+    out:
+      - outputFile
+    
 
 #---------- Step 20: createHeatmapCorrelationPlot ------------------
 
