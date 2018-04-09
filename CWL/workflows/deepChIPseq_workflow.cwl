@@ -149,7 +149,15 @@ inputs:
 
 #---------- Step 20: createHeatmapCorrelationPlot ------------------
 
+  plotTitle_createHeatmapCorrelationPlot: string
 
+  corrMethod:
+    type:
+      type: enum
+      symbols: ['spearman', 'pearson']
+
+#-------------------------------------------------------------------
+#-------------------------------------------------------------------
 
 outputs: []
 
@@ -599,6 +607,7 @@ steps:
 
       # ~Additional inputs~
       filePrefix: filePrefix
+
     out:
       - outputBamFile
 
@@ -621,12 +630,45 @@ steps:
       blackListFileName: blacklistRegions
       outRawCounts: 
         valueFrom: $( input.filePrefix.map(function(e) {return e + ".auto.counts-summ"}) )
+ 
+     # ~Additional inputs~
+      filePrefix: filePrefix 
+
     out:
       - outputFile
     
 
 #---------- Step 20: createHeatmapCorrelationPlot ------------------
 
+  createHeatmapCorrelationPlot:
+    run: ../tools/deepTools-tool-plotCorrelation.cwl
+    in:
+#      corData: SAMPLEID.npz TODO: What file?
+      plotFile:
+        valueFrom: $( input.filePrefix.map(function(e) {return e + ".bamcorr"}) )
+# TODO: Shouldnt it be .svg at the end?
+      whatToPlot:
+        valueFrom: heatmap
+      plotTitle: plotTitle_createHeatmapCorrelationPlot
+      plotFileFormat:
+        valueFrom: svg 
+      corMethod: corrMethod
+      plotNumbers:
+        valueFrom: $ ( 1==1 )
+      zMin:
+        valueFrom: $( -1 )
+      zMax: 
+        valueFrom: $( 1 )
+      colorMap:
+        valueFrom: $( "coolwarm" )
+      outFileCorMatrix:
+        valueFrom: $( input.filePrefix.map(function(e) {return e + ".corrmat"}) 
+ 
+      # ~Additional inputs~
+      filePrefix: filePrefix
+ 
+    out:
+      - outputFile
 
 
 $namespaces:
