@@ -27,8 +27,24 @@ outputs:
 
 inputs:
 
+  fileA:
+    type: File
+    inputBinding:
+      position: 2
+      prefix: -a
+    doc: |
+      Format is bed/gff/vcf/bam.
+
+  fileB:
+    type: File
+    inputBinding:
+      position: 3
+      prefix: -b
+    doc: |
+      Format is bed/gff/vcf/bam.
+
   originalEntryA:
-    type: boolean
+    type: boolean?
     inputBinding:
       position: 5
       prefix: -wa
@@ -36,7 +52,7 @@ inputs:
       Write the original entry in A for each overlap.
 
   originalEntryB:
-    type: boolean
+    type: boolean?
     inputBinding:
       position: 5
       prefix: -wb
@@ -44,7 +60,7 @@ inputs:
       Write the original entry in B for each overlap.
 
   leftOuterJoin:
-    type: boolean
+    type: boolean?
     inputBinding:
       position: 5
       prefix: -loj
@@ -52,7 +68,7 @@ inputs:
       Perform a "left outer join". That is, for each feature in A report each overlap with B.  If no overlaps are found, report a NULL feature for B.
 
   originalAB1:
-    type: boolean
+    type: boolean?
     inputBinding:
       position: 5
       prefix: -wo
@@ -61,7 +77,7 @@ inputs:
       - Overlaps restricted by -f and -r. Only A features with overlap are reported.
 
   originalAB2:
-    type: boolean
+    type: boolean?
     inputBinding:
       position: 5
       prefix: -wao
@@ -70,7 +86,7 @@ inputs:
       - Overlapping features restricted by -f and -r. However, A features w/o overlap are also reported with a NULL B feature and overlap = 0.
 
   orginalAOnce:
-    type: boolean
+    type: boolean?
     inputBinding:
       position: 5
       prefix: -u
@@ -80,7 +96,7 @@ inputs:
       - Overlaps restricted by -f and -r.
 
   forAllAOverlaps:
-    type: boolean
+    type: boolean?
     inputBinding:
       position: 5
       prefix: -c
@@ -90,7 +106,7 @@ inputs:
       - Overlaps restricted by -f and -r.
 
   allAWithoutOverlap:
-    type: boolean
+    type: boolean?
     inputBinding:
       position: 5
       prefix: -v
@@ -99,7 +115,7 @@ inputs:
       - Similar to "grep -v" (an homage).
 
   uncompressedBAM:
-    type: boolean
+    type: boolean?
     inputBinding:
       position: 5
       prefix: -ubam
@@ -107,7 +123,7 @@ inputs:
       Write uncompressed BAM output. Default writes compressed BAM.
 
   requireSameStrandedness:
-    type: boolean
+    type: boolean?
     inputBinding:
       position: 5
       prefix: -s
@@ -116,7 +132,7 @@ inputs:
       - By default, overlaps are reported without respect to strand.
 
   requireDiffStrandedness:
-    type: boolean
+    type: boolean?
     inputBinding:
       position: 5
       prefix: -S
@@ -125,7 +141,7 @@ inputs:
       - By default, overlaps are reported without respect to strand.
 
   minOverlapReqA:
-    type: boolean
+    type: boolean?
     inputBinding:
       position: 5
       prefix: -f
@@ -135,7 +151,7 @@ inputs:
       - FLOAT (e.g. 0.50)
 
   minOverlapReqB:
-    type: boolean
+    type: boolean?
     inputBinding:
       position: 5
       prefix: -F
@@ -145,7 +161,7 @@ inputs:
       - FLOAT (e.g. 0.50)
 
   reciprocalOverlapAB:
-    type: boolean
+    type: boolean?
     inputBinding:
       position: 5
       prefix: -r
@@ -154,7 +170,7 @@ inputs:
       - In other words, if -f is 0.90 and -r is used, this requires that B overlap 90% of A and A _also_ overlaps 90% of B.
 
   minFractionAOrB:
-    type: boolean
+    type: boolean?
     inputBinding:
       position: 5
       prefix: -e
@@ -163,7 +179,7 @@ inputs:
       - In other words, if -e is used with -f 0.90 and -F 0.10 this requires that either 90% of A is covered OR 10% of  B is covered. Without -e, both fractions would have to be satisfied.
 
   split:
-    type: boolean
+    type: boolean?
     inputBinding:
       position: 5
       prefix: -split
@@ -171,7 +187,7 @@ inputs:
       Treat "split" BAM or BED12 entries as distinct BED intervals.
 
   genome:
-    type: File
+    type: File?
     inputBinding:
       position: 5
       prefix: -g
@@ -179,7 +195,7 @@ inputs:
       Provide a genome file to enforce consistent chromosome sort order across input files. Only applies when used with -sorted option.
 
   noNameCheck:
-    type: boolean
+    type: boolean?
     inputBinding:
       position: 5
       prefix: -nonamecheck
@@ -187,7 +203,7 @@ inputs:
       For sorted data, don't throw an error if the file has different naming conventions for the same chromosome. ex. "chr1" vs "chr01".
 
   sorted:
-    type: boolean
+    type: boolean?
     inputBinding:
       position: 5
       prefix: -sorted
@@ -196,6 +212,7 @@ inputs:
 
   names:
     type:
+    - "null"
     - type: array
       items: string
     inputBinding:
@@ -205,7 +222,7 @@ inputs:
       When using multiple databases, provide an alias for each that will appear instead of a fileId when also printing the DB record.
 
   fileNames:
-    type: boolean
+    type: boolean?
     inputBinding:
       position: 5
       prefix: -filenames
@@ -213,7 +230,7 @@ inputs:
       When using multiple databases, show each complete filename instead of a fileId when also printing the DB record.
 
   sortOut:
-    type: boolean
+    type: boolean?
     inputBinding:
       position: 5
       prefix: -sortout
@@ -221,7 +238,7 @@ inputs:
       When using multiple databases, sort the output DB hits for each record.
 
   bed:
-    type: boolean
+    type: boolean?
     inputBinding:
       position: 5
       prefix: -bed
@@ -229,7 +246,7 @@ inputs:
       If using BAM input, write output as BED.
 
   header:
-    type: boolean
+    type: boolean?
     inputBinding:
       position: 5
       prefix: -header
@@ -237,7 +254,7 @@ inputs:
       Print the header from the A file prior to results.
 
   noBuf:
-    type: boolean
+    type: boolean?
     inputBinding:
       position: 5
       prefix: -nobuf
@@ -245,7 +262,7 @@ inputs:
       Disable buffered output. Using this option will cause each line of output to be printed as it is generated, rather than saved in a buffer. This will make printing large output files noticeably slower, but can be useful in conjunction with other software tools and scripts that need to process one line of bedtools output at a time.
 
   iobuf:
-    type: boolean
+    type: boolean?
     inputBinding:
       position: 5
       prefix: -iobuf
