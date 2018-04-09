@@ -114,6 +114,8 @@ inputs:
 
 #---------- Step 7: generateCoverageForFilteredBam -----------------
 
+#TODO: For several steps?
+
   blacklistRegions:
     type: File
 
@@ -518,6 +520,27 @@ steps:
 
 
 #---------- Step 15: intersectPeakFiles ----------------------------
+
+  intersectPeakFiles:
+    run: ../tools/bioconda-tool-bedtools-intersect.cwl
+    scatter: [fileA]
+    scatterMethod: dotproduct
+    in:
+      originalAOnce:
+        valueFrom: $( 1==1 )
+      fileA:
+        valueFrom: $( input.narrowPrefix.map(function(e) {return e + ".tmp.filt.bam_" + input.pre + ".bed"}) )
+
+#TODO: Only narrow peak files. Outputs for broad files are: <name>_peaks.broadPeak, <name>_peaks.xls and <name>_summits.gappesPeak
+
+      fileB: blacklistRegions
+       
+      # ~Additional inputs~
+      narrowPrefix: prefix_narrow
+      pre: prefix_peakCallOnFilteredBam
+    out:
+      - outputFile
+
 
 #---------- Step 16: intersectHistoneHMMFiles ----------------------
 
