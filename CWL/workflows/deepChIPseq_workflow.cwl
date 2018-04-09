@@ -134,6 +134,11 @@ inputs:
   fragmentLength_peakCallOnFilteredBam: int[]
 
 
+#---------- Step 17: flagAndStandardizePeaks -----------------------
+
+  autosomeRegions: File
+
+
 outputs: []
 
   #TODO
@@ -265,7 +270,7 @@ steps:
       narrowPrefix: prefix_narrow
       broadPrefix: prefix_broad
       inputPrefix: prefix_input
-
+      filePrefix: filePrefix
     out:
       - outputFile
 
@@ -544,7 +549,43 @@ steps:
 
 #---------- Step 16: intersectHistoneHMMFiles ----------------------
 
+  intersectHistoneHMMFiles:
+    run: ../tools/bioconda-tool-bedtools-intersect.cwl
+#    scatter: [fileA]
+#    scatterMethod: dotproduct
+    in:
+      originalAOnce:
+        valueFrom: $( 1==1 )
+#      fileA:
+#        valueFrom: TODO: Which file? 
+#      fileB:
+#        valueFrom: TODO: Which file?
+
+      # ~Additional inputs~
+    out:
+      - outputFile
+
+
 #---------- Step 17: flagAndStandardizePeaks -----------------------
+
+  flagAndStandardizePeaks:
+    run: ../tools/bioconda-tool-sambamba-view.cwl
+    scatter: [outputFilename, inputFile]
+    scatterMethod: dotproduct
+    in:
+      format:
+        valueFrom: bam
+      nThreads: sambambaParallel
+      outputFilename:
+        valueFrom: $( input.filePrefix.map(function(e) {return e + ".tmp.auto.bam"}) )
+      regions: autosomeRegions
+      inputFile: filterBamFiles/outputBamFile
+
+      # ~Additional inputs~
+      filePrefix: filePrefix
+    out:
+      - outputBamFile
+
 
 #---------- Step 18: restrictFilteredBAMstoAutosomalRegions --------
 
