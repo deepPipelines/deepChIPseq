@@ -91,10 +91,7 @@ inputs:
       A BED file containing regions that should be excluded from all analyses. Currently this works by rejecting genomic chunks that happen to overlap an entry. Consequently, for BAM files, if a read partially overlaps a blacklisted region or a fragment spans over it, then the read/fragment might still be considered. (default: None)
 
   numberOfProcessors:
-    type: 
-    - "null"
-    - type: enum
-      symbols: ['max/2', 'max']
+    type: int?
     inputBinding:
       position: 10
       prefix: -p
