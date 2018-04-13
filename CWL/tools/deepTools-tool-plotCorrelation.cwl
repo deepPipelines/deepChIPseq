@@ -31,7 +31,7 @@ outputs:
 
   outputFile:
     type: File
-    inputBinding:
+    outputBinding:
       glob: $( inputs.plotTitle )
 
 
@@ -52,9 +52,9 @@ inputs:
       prefix: -o 
 
   corMethod:
-    type:
-      type: enum
-      symbols: ['spearman', 'pearson']
+    type: strigg
+#      type: enum
+#      symbols: ['spearman', 'pearson']
     doc: Correlation method.
     inputBinding:
       prefix: -c 
