@@ -52,7 +52,7 @@ inputs:
       prefix: -o 
 
   corMethod:
-    type: strigg
+    type: string
 #      type: enum
 #      symbols: ['spearman', 'pearson']
     doc: Correlation method.
