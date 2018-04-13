@@ -39,7 +39,7 @@ inputs:
     secondaryFiles:
       - "^.bai"
 
-  # Raw bamfiles: GALvX_Input
+  # Raw input bamfile: GALvX_Input
   bamFilesRaw_Input:
     type: File
     secondaryFiles:
@@ -58,9 +58,15 @@ inputs:
   genomeSize: int
 
 
+#---------- Blacklist Regions --------------------------------------
+
+  blacklistRegions:
+    type: File
+
+
 #---------- Step specific parameters -------------------------------
 
-
+#---------- Step 1: generateSignalCovTrack -------------------------
 #---------- Step 2: computeGCBias ----------------------------------
 #---------- Step 3: generateLog2FoldChangeTracks -------------------
 #---------- Step 4: computeFingerprintOnRawBam ---------------------
@@ -75,12 +81,12 @@ inputs:
 #---------- Step 11: histoneHMM ------------------------------------
 #---------- Step 12: makeHistoneHMMBedLike -------------------------
 #---------- Step 13: zipSecHistoneHMMFiles -------------------------
-#---------- Step 14: CountReadsOverlappingPeakRegions --------------
-#---------- Step 15: IntersectPeakFiles ----------------------------
-#---------- Step 16: IntersectHistoneHMMFiles ----------------------
+#---------- Step 14: countReadsOverlappingPeakRegions --------------
+#---------- Step 15: intersectPeakFiles ----------------------------
+#---------- Step 16: intersectHistoneHMMFiles ----------------------
 #---------- Step 17: flagAndStandardizePeaks -----------------------
-#---------- Step 18: RestrictFilteredBAMstoAutosomalRegions --------
-#---------- Step 19: CreateDataMatrixForCorrelationPlot ------------
+#---------- Step 18: restrictFilteredBAMstoAutosomalRegions --------
+#---------- Step 19: createDataMatrixForCorrelationPlot ------------
 #---------- Step 20: createHeatmapCorrelationPlot ------------------
 
 
@@ -93,7 +99,7 @@ inputs:
 
 #---------- Step 3: generateLog2FoldChangeTracks -------------------
 
-  scaleFactorsMeth:
+  scaleFactorsMethod_generateLog2FoldChangeTracks:
     type:
     - "null"
     - type: enum
@@ -102,7 +108,7 @@ inputs:
 
 #---------- Step 4: computeFingerprintOnRawBam ---------------------
 
-  outName_computeFingerprintOnRawBam_labels:
+  labels_computeFingerprintOnRawBam:
     type:
     - "null"
     - type: array
@@ -112,17 +118,9 @@ inputs:
     type: string
 
 
-#---------- Step 7: generateCoverageForFilteredBam -----------------
-
-#TODO: For several steps?
-
-  blacklistRegions:
-    type: File
-
-
 #---------- Step 8: computeFingerprintForFilteredBam ---------------
 
-  outName_computeFingerprintForFilteredBam_labels: string[]
+  labels_computeFingerprintForFilteredBam: string[]
 
   plotTitle_computeFingerprintForFilteredBam: string
 
@@ -136,12 +134,12 @@ inputs:
 
 #---------- Step 18: restrictFilteredBAMstoAutosomalRegions --------
 
-  autosomeRegions: File
+  autosomeRegions_restrictFilteredBAMstoAutosomalRegions: File[]
 
 
 #---------- Step 19: createDataMatrixForCorrelationPlot ------------
 
-  outName_createDataMatrixForCorrelationPlot_labels:
+  labels_createDataMatrixForCorrelationPlot:
     - "null"
     - type: array
       items: string
@@ -151,13 +149,20 @@ inputs:
 
   plotTitle_createHeatmapCorrelationPlot: string
 
-  corrMethod:
-    type:
-      type: enum
-      symbols: ['spearman', 'pearson']
+  corrMethod_createHeatmapCorrelationPlot:
+    type: string
+#    - type: enum
+#      symbols: ['spearman', 'pearson']
 
 #-------------------------------------------------------------------
+
+  dummyFileA: File
+  dummyFileB: File
+  
+  dummyCorrFile: File
+
 #-------------------------------------------------------------------
+
 
 outputs: []
 
@@ -167,7 +172,7 @@ outputs: []
 steps:
   
 
-#----------- Step 1: generateSignalCovTrack --------------------------
+#---------- Step 1: generateSignalCovTrack -------------------------
 
   generateSignalCovTrack:
     run: ../tools/deepTools-tool-bamCoverage.cwl
@@ -178,7 +183,7 @@ steps:
       binSize: 
         valueFrom: $( 25)
       bam:
-        valueFrom: $(input.narrowBam.concat(input.broadBam).concat(input.inputBam))
+        valueFrom: $( input.narrowBam.concat(input.broadBam).concat(input.inputBam))
       outFileName:
         valueFrom: $( input.narrowPrefix.concat(input.broadPrefix).concat(input.inputPrefix).map(function(e) {return e + ".raw.bamcov"}) )
       outFileFormat: 
@@ -201,7 +206,7 @@ steps:
 
   computeGCBias:
     run: ../tools/deepTools-tool-computeGCBias.cwl
-    scatter: [bamfile, GCbiasFrequenciesFile, fragmentLength]
+    scatter: [bamfile, GCbiasFrequenciesFile, fragmentLength, biasPlot]
     scatterMethod: dotproduct
     in:
       numberOfProcessors: deeptoolsParallel
@@ -231,13 +236,14 @@ steps:
       - outputFile
 
 
-#---------- Step 3: generateLog2FoldChangeTracks ---------------------
+#---------- Step 3: generateLog2FoldChangeTracks -------------------
 
   generateLog2FoldChangeTracks:
     run: ../tools/deepTools-tool-bamCompare.cwl
     scatter: [bamfile1, outFileName]
     scatterMethod: dotproduct
     in:
+      numberOfProcessors: deeptoolsParallel
       bamfile1: 
         valueFrom: $(input.narrowBam.concat(input.broadBam))
       bamfile2: bamFilesRaw_Input
@@ -245,7 +251,7 @@ steps:
         valueFrom: $( input.narrowPrefix.concat(input.broadPrefix).map(function(e) {return e + ".log2-Input"}) )
       outFileFormat:
         valueFrom: bigwig
-      scaleFactorsMethod: scaleFactorsMeth
+      scaleFactorsMethod: scaleFactorsMethod_generateLog2FoldChangeTracks
       ratio:
         valueFrom: log2
       binSize:
@@ -271,7 +277,7 @@ steps:
         valueFrom: $(input.narrowBam.concat(input.broadBam).concat(input.inputBam))
       plotFile:
         valueFrom: $( input.filePrefix.map(function(e) {return e + ".fgpr"}) )
-      labels: outName_computeFingerprintOnRawBam_labels
+      labels: labels_computeFingerprintOnRawBam
       plotTitle: plotTitle_computeFingerprintOnRawBam
       numberOfSamples: 
         valueFrom: $( 500000 )
@@ -324,7 +330,7 @@ steps:
       - outputBamFile
 
 
-#---------- Step 6: countReadsInFilteredBam -------------------.....
+#---------- Step 6: countReadsInFilteredBam ------------------------
 
   countReadsInFilteredBam:
     run: ../tools/bioconda-tool-sambamba-view.cwl
@@ -361,7 +367,7 @@ steps:
       outFileFormat:
         valueFrom:  bigwig
       normalizeTo1x: genomeSize 
-      blackListFileName: blacklistRegions 
+      blackListFileName: blacklistRegions #TODO: 1 File for all or step specific?
       ignoreForNormalization:
         valueFrom:  $( ["chrX", "chrY", "chrM", "X", "Y", "M", "MT"] )
 
@@ -383,29 +389,30 @@ steps:
       bamfiles: filterBamFiles/outputBamFile
       plotFile:
         valueFrom: $( input.filePrefix.map(function(e) {return e + ".tmp.filt.fgpr"}) )
-      labels: outName_computeFingerprintForFilteredBam_labels
+      labels: labels_computeFingerprintForFilteredBam
       plotTitle: plotTitle_computeFingerprintForFilteredBam 
       numberOfSamples:
         valueFrom: $( 500000 )
       plotFileFormat:
        valueFrom: svg
       outQualityMetrics:
-        valueFrom: $( input.narrowPrefix.concat(input.broadPrefix).concat(input.inputPrefix).map(function(e) {return e + ".tmp.filt.qm-fgpr.tmp"}) )
+        valueFrom: $( input.filePrefix.map(function(e) {return e + ".tmp.filt.qm-fgpr.tmp"}) )
       JSDsample:        
         valueFrom: $( input.inputPrefix.map(function(e) {return e + ".tmp.filt.bam"}) )
       outRawCounts:
-        valueFrom: $( input.narrowPrefix.concat(input.broadPrefix).concat(input.inputPrefix).map(function(e) {return e + ".tmp.filt.counts-fgpr"}) )
+        valueFrom: $( input.filePrefix).map(function(e) {return e + ".tmp.filt.counts-fgpr"}) )
 
       # ~Additional inputs~
-      narrowPrefix: prefix_narrow
-      broadPrefix: prefix_broad
       inputPrefix: prefix_input
+      filePrefix: filePrefix
 
     out:
       - outputFile
 
 
 #---------- Step 9.1: peakCallOnFilteredBam - narrow ---------------
+
+# TODO: OK that step is split? Reason: --broad option
 
   peakCallOnFilteredBamN:
     run: ../tools/bioconda-tool-macs2-callpeak.cwl
@@ -423,9 +430,11 @@ steps:
         valueFrom: $( "all" )
       name: 
         valueFrom: $( input.narrowPrefix.map(function(e) {return e + ".tmp.filt.bam_" + input.pre}) )
+        # TODO: Which name to take here? At the moment: prefix_peakCallOnFilteredBam
       noModel:
         valueFrom: $( 1==1 ) 
       extSize: fragmentLength_peakCallOnFilteredBam
+      # TODO: Fragment length the same for all files?
       qValue:
         valueFrom: $( 0.05 ) 
      
@@ -456,9 +465,11 @@ steps:
         valueFrom: $( "all" )
       name:
         valueFrom: $( input.broadPrefix.map(function(e) {return e + ".tmp.filt.bam_" + input.pre}) )
+        # TODO: Which name to take here? At the moment: prefix_peakCallOnFilteredBam
       noModel:
         valueFrom: $( 1==1 )
       extSize: fragmentLength_peakCallOnFilteredBam
+      # TODO: Fragment length the same for all files?
       qValue:
         valueFrom: $( 0.05 )
       broad: 
@@ -475,6 +486,8 @@ steps:
 
 #---------- Step 10.1: zipMacsFiles - narrow -----------------------
 #
+# TODO: Not working
+
 #  zipMacsFilesN:
 #    run: ../tools/localfile-tool-zipMacsFiles.cwl
 #    scatter: [inputFile1, inputFile2, inputFile3, outname]
@@ -492,16 +505,20 @@ steps:
 #      # ~Additional Inputs~
 #      narrowPrefix: prefix_narrow
 #      pre: prefix_peakCallOnFilteredBam
-#      inPrefix: prefix_narrow
+       # TODO: OK?
+#      inPrefix: prefix_input
+#
 #  out:
 #   - outZipFile
 
 
 #---------- Step 10.2: zipMacsFiles - broad ------------------------
+#
+# TODO: Not working
 
 #  zipMacsFilesB:
 #    run: ../tools/localfile-tool-zipMacsFiles.cwl
-#    scatter: [arg1, arg2, arg3, outname]
+#    scatter: [inputFile1, inputFile2, inputFile3, outname]
 #    scatterMethod: dotproduct
 #    in:
 #      inputFile1:
@@ -514,24 +531,32 @@ steps:
 #         valueFrom: $( input.inPrefix.map(function(e) {return e + ".macs.out"}) )
 #
 #      # ~Additional Inputs~
-#      narrowPrefix: prefix_narrow
+#      broadPrefix: prefix_broad
 #      pre: prefix_peakCallOnFilteredBam
-#      inPrefix: prefix_broad
+       # TODO: OK?
+#      inPrefix: prefix_input
+#
 #  out:
 #    outZipFile
 
 
 #---------- Step 11: histoneHMM ------------------------------------
+# TODO: Missing
+
 
 #---------- Step 12: makeHistoneHMMBedLike -------------------------
+# TODO: Missing
+
 
 #---------- Step 13: zipSecHistoneHMMFiles -------------------------
+# TODO: Missing
+
 
 #---------- Step 14: countReadsOverlappingPeakRegions --------------
 
   countReadsOverlappingPeakRegions:
     run: ../tools/bioconda-tool-sambamba-view.cwl
-    scatter: [inputFile]
+    scatter: [inputFile, regions]
     scatterMethod: dotproduct
     in:
       count: 
@@ -540,6 +565,15 @@ steps:
       regions: 
         valueFrom: $( (input.narrowPrefix.map(function(e) {return e + ".tmp.filt.bam_" + input.pre + "_peaks.narrowPeak"})).concat(input.broadPrefix.map(function(e) {return e + ".tmp.filt.bam_" + input.pre + "_peaks.broadPeak"})) )
       inputFile: filterBamFiles/outputBamFile
+      outputFileName:
+        valueFrom: $( input.narrowPrefix.concat(input.broadPrefix).concat(input.inputPrefix).map(function(e) {return e + ".tmp.peak_ovl.cnt"}) )
+
+      # ~Additional Inputs~
+      narrowPrefix: prefix_narrow
+      broadPrefix: prefix_broad
+      pre: prefix_peakCallOnFilteredBam      # TODO: OK?
+      inPrefix: prefix_input
+
     out:
       - outputBamFile
 
@@ -554,15 +588,17 @@ steps:
       originalAOnce:
         valueFrom: $( 1==1 )
       fileA:
-        valueFrom: $( input.narrowPrefix.map(function(e) {return e + ".tmp.filt.bam_" + input.pre + ".bed"}) )
+        valueFrom: $( input.narrowPrefix.map(function(e) {return e + ".tmp.filt.bam_" + input.pre + "_summits.bed"}) )
+# TODO: Only narrow peak files. Outputs for broad files are: <name>_peaks.broadPeak, <name>_peaks.xls and <name>_summits.gappedPeak
 
-#TODO: Only narrow peak files. Outputs for broad files are: <name>_peaks.broadPeak, <name>_peaks.xls and <name>_summits.gappesPeak
+      fileB: blacklistRegions         # TODO: 1 File for all or step specific?
+      outFileName:
+        valueFrom: $( input.narrowPrefix.map(function(e) {return e + ".peak-ovl-bl"}) )
 
-      fileB: blacklistRegions
-       
       # ~Additional inputs~
       narrowPrefix: prefix_narrow
-      pre: prefix_peakCallOnFilteredBam
+      pre: prefix_peakCallOnFilteredBam      # TODO: OK?
+
     out:
       - outputFile
 
@@ -576,19 +612,22 @@ steps:
     in:
       originalAOnce:
         valueFrom: $( 1==1 )
-#      fileA:
-#        valueFrom: TODO: Which file? 
-#      fileB:
-#        valueFrom: TODO: Which file?
-
+      fileA:
+        valueFrom: dummyFileA    # TODO: Which file? 
+      fileB:
+        valueFrom: dummyFileB    # TODO: Which file?
+#      outFileName: TODO: Which name?
+ 
       # ~Additional inputs~
+      # TODO
     out:
       - outputFile
 
 
 #---------- Step 17: flagAndStandardizePeaks -----------------------
 
-# TODO
+# TODO: Missing
+
 
 #---------- Step 18: restrictFilteredBAMstoAutosomalRegions --------
 
@@ -602,7 +641,7 @@ steps:
       nThreads: sambambaParallel
       outputFilename:
         valueFrom: $( input.filePrefix.map(function(e) {return e + ".tmp.auto.bam"}) )
-      regions: autosomeRegions
+      regions: autosomeRegions_restrictFilteredBAMstoAutosomalRegions
       inputFile: filterBamFiles/outputBamFile
 
       # ~Additional inputs~
@@ -622,12 +661,12 @@ steps:
       bamfiles: restrictFilteredBAMstoAutosomalRegions/outputBamFile 
       outFileName:
         valueFrom: $( input.filePrefix.map(function(e) {return e + ".auto.summ"}) )
-      labels: outName_createDataMatrixForCorrelationPlot_labels
+      labels: labels_createDataMatrixForCorrelationPlot
       binSize:
         valueFrom: $( 1000 )
       distanceBetweenBins:
         valueFrom: $( 2000 )
-      blackListFileName: blacklistRegions
+      blackListFileName: blacklistRegions    # TODO: 1 File for all or step specific?
       outRawCounts: 
         valueFrom: $( input.filePrefix.map(function(e) {return e + ".auto.counts-summ"}) )
  
@@ -643,7 +682,7 @@ steps:
   createHeatmapCorrelationPlot:
     run: ../tools/deepTools-tool-plotCorrelation.cwl
     in:
-#      corData: SAMPLEID.npz TODO: What file?
+      corData: dummyCorrFile      # TODO: What file?
       plotFile:
         valueFrom: $( input.filePrefix.map(function(e) {return e + ".bamcorr"}) )
 # TODO: Shouldnt it be .svg at the end?
@@ -652,7 +691,7 @@ steps:
       plotTitle: plotTitle_createHeatmapCorrelationPlot
       plotFileFormat:
         valueFrom: svg 
-      corMethod: corrMethod
+      corMethod: corrMethod_createHeatmapCorrelationPlot
       plotNumbers:
         valueFrom: $ ( 1==1 )
       zMin:
