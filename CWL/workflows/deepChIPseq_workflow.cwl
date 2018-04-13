@@ -186,11 +186,6 @@ outputs:
     type: File[]
     outputSource: TODO
 
-  # DEEPID.PROC.DATE.ASSM.gcbias
-  - id: out5
-    type: File[]
-    outputSource: "#computeGCBias/outputFile"
-
   # DEEPID.PROC.DATE.ASSM.gcfreq
   - id: out6
     type: File[]
@@ -221,40 +216,15 @@ outputs:
     type: File[]
     outputSource: "#peakCallOnFilteredBamB/outputBamFile"
 
-  # DEEPID.PROC.DATE.ASSM.macs.narrow
-  - id: out12
-    type: File[]
-    outputSource: "#computeFingerprintForFilteredBam/outputFile" 
-
-  # DEEPID.PROC.DATE.ASSM.fgpr
-  - id: out13
-    type: File[]
-    outputSource: "#computeFingerprintForFilteredBam/outputFile"
-
   # DEEPID.PROC.DATE.ASSM.qm-fgpr
   - id: out14
     type: File[]
     outputSource: "#computeFingerprintForFilteredBam/outputFile"
 
-  # DEEPID.PROC.DATE.ASSM.counts-fgpr
-  - id: out15
-    type: File[]
-    outputSource: "#createDataMatrixForCorrelationPlot/outputFile"
-
   # DEEPID.PROC.DATE.ASSM.auto.counts-summ
   - id: out16
     type: File[]
     outputSource: "#createDataMatrixForCorrelationPlot/outputFile"
-
-  # DEEPID.PROC.DATE.ASSM.auto.summ
-  - id: out17
-    type: File[]
-    outputSource: "#createHeatmapCorrelationPlot/outputFile"
-
-  # DEEPID.PROC.DATE.ASSM.bamcorr
-  - id: out18
-    type: File[]
-    outputSource: "#createHeatmapCorrelationPlot/outputFile"
 
   # DEEPID.PROC.DATE.ASSM.corrmat
   - id: out19
@@ -425,56 +395,6 @@ steps:
       - outputBamFile
 
 
-#---------- Step 6: countReadsInFilteredBam ------------------------
-
-  countReadsInFilteredBam:
-    run: ../tools/bioconda-tool-sambamba-view.cwl
-    scatter: [inputFile]
-    in:
-      count:
-        valueFrom: $( 1==1 )
-      inputFile: filterBamFiles/outputBamFile
-      outputFileName:
-        valueFrom: $( input.narrowPrefix.concat(input.broadPrefix).concat(input.inputPrefix).map(function(e) {return e + ".mapped.readcount"}) )
-
-      # ~Additional inputs~
-      narrowPrefix: prefix_narrow
-      broadPrefix: prefix_broad
-      inputPrefix: prefix_input
-
-    out: 
-      - outputBamFile
-
-
-#---------- Step 7: generateCoverageForFilteredBam -----------------
-
-  generateCoverageForFilteredBam:
-    run: ../tools/deepTools-tool-bamCoverage.cwl
-    scatter: [bam, outFileName]
-    scatterMethod: dotproduct
-    in:
-      numberOfProcessors: deeptoolsParallel 
-      binSize:
-        valueFrom: $( 25 ) 
-      bam: filterBamFiles/outputBamFile 
-      outFileName: 
-        valueFrom: $( input.narrowPrefix.concat(input.broadPrefix).concat(input.inputPrefix).map(function(e) {return e + ".filt.bamcov"}) )
-      outFileFormat:
-        valueFrom:  bigwig
-      normalizeTo1x: genomeSize 
-      blackListFileName: blacklistRegions #TODO: 1 File for all or step specific?
-      ignoreForNormalization:
-        valueFrom:  $( ["chrX", "chrY", "chrM", "X", "Y", "M", "MT"] )
-
-      # ~Additional inputs~
-      narrowPrefix: prefix_narrow
-      broadPrefix: prefix_broad
-      inputPrefix: prefix_input
-
-    out:
-      - outputFile
-
-
 #---------- Step 8: computeFingerprintForFilteredBam ---------------
 
   computeFingerprintForFilteredBam:
@@ -503,43 +423,6 @@ steps:
 
     out:
       - outputFile
-
-
-#---------- Step 9.1: peakCallOnFilteredBam - narrow ---------------
-
-# TODO: OK that step is split? Reason: --broad option
-
-  peakCallOnFilteredBamN:
-    run: ../tools/bioconda-tool-macs2-callpeak.cwl
-    scatter: [tFile, name, extSize]
-    scatterMethod: dotproduct
-    in:
-      tFile: 
-       valueFrom: $( input.narrowPrefix.map(function(e) {return e + ".tmp.filt.bam"}) )
-      cFile: 
-        valueFrom: $( input.inputPrefix.map(function(e) {return e + ".tmp.filt.bam"}) )
-      format:
-        valueFrom: BAM 
-      gSize: genomeSize
-      keepDup: 
-        valueFrom: $( "all" )
-      name: 
-        valueFrom: $( input.narrowPrefix.map(function(e) {return e + ".tmp.filt.bam_" + input.pre}) )
-        # TODO: Which name to take here? At the moment: prefix_peakCallOnFilteredBam
-      noModel:
-        valueFrom: $( 1==1 ) 
-      extSize: fragmentLength_peakCallOnFilteredBam
-      # TODO: Fragment length the same for all files?
-      qValue:
-        valueFrom: $( 0.05 ) 
-     
-      # ~Additional inputs~
-      narrowPrefix: prefix_narrow
-      inputPrefix: prefix_input
-      pre: prefix_peakCallOnFilteredBam
-
-    out:
-      - outputBamFile
 
 
 #---------- Step 9.2: peakCallOnFilteredBam - broad ----------------
@@ -579,61 +462,6 @@ steps:
       - outputBamFile
 
 
-#---------- Step 10.1: zipMacsFiles - narrow -----------------------
-#
-# TODO: Not working
-
-#  zipMacsFilesN:
-#    run: ../tools/localfile-tool-zipMacsFiles.cwl
-#    scatter: [inputFile1, inputFile2, inputFile3, outname]
-#    scatterMethod: dotproduct
-#    in:
-#      inputFile1:
-#        valueFrom: $( input.narrowPrefix.map(function(e) {return e + ".tmp.filt.bam_" + input.pre + "_peaks.narrowPeak"}) )
-#      inputFile2:
-#        valueFrom: $( input.narrowPrefix.map(function(e) {return e + ".tmp.filt.bam_" + input.pre + "_peaks.xls"}) )
-#      inputFile3:
-#        valueFrom: $( input.narrowPrefix.map(function(e) {return e + ".tmp.filt.bam_" + input.pre + "_summits.bed"}) )
-#      outname:
-#         valueFrom: $( input.inPrefix.map(function(e) {return e + ".macs.out"}) )
-# 
-#      # ~Additional Inputs~
-#      narrowPrefix: prefix_narrow
-#      pre: prefix_peakCallOnFilteredBam
-       # TODO: OK?
-#      inPrefix: prefix_input
-#
-#  out:
-#   - outZipFile
-
-
-#---------- Step 10.2: zipMacsFiles - broad ------------------------
-#
-# TODO: Not working
-
-#  zipMacsFilesB:
-#    run: ../tools/localfile-tool-zipMacsFiles.cwl
-#    scatter: [inputFile1, inputFile2, inputFile3, outname]
-#    scatterMethod: dotproduct
-#    in:
-#      inputFile1:
-#        valueFrom: $( input.broadPrefix.map(function(e) {return e + ".tmp.filt.bam_" + input.pre + "_peaks.broadPeak"}) )
-#      inputFile2:
-#        valueFrom: $( input.broadPrefix.map(function(e) {return e + ".tmp.filt.bam_" + input.pre + "_peaks.xls"}) )
-#      inpputFile3:
-#        valueFrom: $( input.broadPrefix.map(function(e) {return e + ".tmp.filt.bam_" + input.pre + "_peaks.gappedPeak"}) )
-#      outname:
-#         valueFrom: $( input.inPrefix.map(function(e) {return e + ".macs.out"}) )
-#
-#      # ~Additional Inputs~
-#      broadPrefix: prefix_broad
-#      pre: prefix_peakCallOnFilteredBam
-       # TODO: OK?
-#      inPrefix: prefix_input
-#
-#  out:
-#    outZipFile
-
 
 #---------- Step 11: histoneHMM ------------------------------------
 # TODO: Missing
@@ -645,57 +473,6 @@ steps:
 
 #---------- Step 13: zipSecHistoneHMMFiles -------------------------
 # TODO: Missing
-
-
-#---------- Step 14: countReadsOverlappingPeakRegions --------------
-
-  countReadsOverlappingPeakRegions:
-    run: ../tools/bioconda-tool-sambamba-view.cwl
-    scatter: [inputFile, regions]
-    scatterMethod: dotproduct
-    in:
-      count: 
-        valueFrom: $( 1==1 )
-      nThreads: sambambaParallel
-      regions: 
-        valueFrom: $( (input.narrowPrefix.map(function(e) {return e + ".tmp.filt.bam_" + input.pre + "_peaks.narrowPeak"})).concat(input.broadPrefix.map(function(e) {return e + ".tmp.filt.bam_" + input.pre + "_peaks.broadPeak"})) )
-      inputFile: filterBamFiles/outputBamFile
-      outputFileName:
-        valueFrom: $( input.narrowPrefix.concat(input.broadPrefix).concat(input.inputPrefix).map(function(e) {return e + ".tmp.peak_ovl.cnt"}) )
-
-      # ~Additional Inputs~
-      narrowPrefix: prefix_narrow
-      broadPrefix: prefix_broad
-      pre: prefix_peakCallOnFilteredBam      # TODO: OK?
-      inPrefix: prefix_input
-
-    out:
-      - outputBamFile
-
-
-#---------- Step 15: intersectPeakFiles ----------------------------
-
-  intersectPeakFiles:
-    run: ../tools/bioconda-tool-bedtools-intersect.cwl
-    scatter: [fileA]
-    scatterMethod: dotproduct
-    in:
-      originalAOnce:
-        valueFrom: $( 1==1 )
-      fileA:
-        valueFrom: $( input.narrowPrefix.map(function(e) {return e + ".tmp.filt.bam_" + input.pre + "_summits.bed"}) )
-# TODO: Only narrow peak files. Outputs for broad files are: <name>_peaks.broadPeak, <name>_peaks.xls and <name>_summits.gappedPeak
-
-      fileB: blacklistRegions         # TODO: 1 File for all or step specific?
-      outFileName:
-        valueFrom: $( input.narrowPrefix.map(function(e) {return e + ".peak-ovl-bl"}) )
-
-      # ~Additional inputs~
-      narrowPrefix: prefix_narrow
-      pre: prefix_peakCallOnFilteredBam      # TODO: OK?
-
-    out:
-      - outputFile
 
 
 #---------- Step 16: intersectHistoneHMMFiles ----------------------
@@ -812,3 +589,21 @@ $namespaces:
 $schemas:
   - https://schema.org/docs/schema_org_rdfa.html
   - http://edamontology.org/EDAM_1.18.owl
+
+
+
+#      # ~Additional Inputs~
+#       proxy1:
+#         valueFrom: $( inputs.narrowPeaks.concat(inputs.broadPeaks) )
+#       proxy2:
+#         valueFrom: $(
+#      narrowPrefix: prefix_narrow
+#       narrowPeaks:
+#       narrowTable:
+#       narrowSummits:
+
+#       broadPrefix: prefix_broad
+#       broadPeaks:
+#       broadTable:
+#       broadGapped
+
