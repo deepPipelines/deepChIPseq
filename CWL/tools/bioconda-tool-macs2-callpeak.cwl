@@ -19,12 +19,23 @@ requirements:
 
 baseCommand: ["macs2", "callpeak"]
 
-stdout: $( inputs.outputFileName )
 
 outputs:
   
-  outputBamFile:
-    type: stdout
+  peakFile:
+    type: File
+    outputBinding:
+      glob: $(inputs.broad?"*_peaks.broadPeak":"*_peaks.narrowPeak")
+
+  tableFile:
+    type: File
+    outputBinding:
+      glob: $("*_peaks.xls")
+
+  extraFile:
+    type: File
+      outputBinding:
+        glob: $(inputs.broad?"*_peaks.gappedPeak":"*_summits.bed")
 
 inputs:
 
@@ -56,7 +67,7 @@ inputs:
       Format of tag file, "AUTO", "BED" or "ELAND" or "ELANDMULTI" or "ELANDEXPORT" or "SAM" or "BAM" or "BOWTIE" or "BAMPE" or "BEDPE". The default AUTO option will let MACS decide which format (except for BAMPE and BEDPE which should be implicitly set) the file is. Please check the definition in README. Please note that if the format is set as BAMPE or BEDPE, MACS2 will call its special Paired-end mode to call peaks by piling up the actual ChIPed fragments defined by both aligned ends, instead of predicting the fragment size first and extending reads. Also please note that the BEDPE only contains three columns, and is NOT the same BEDPE format used by BEDTOOLS. DEFAULT: "AUTO"
 
   gSize:
-    type: string?
+    type: int?
     inputBinding:
       position: 25
       prefix: -g
@@ -64,7 +75,7 @@ inputs:
       Effective genome size. It can be 1.0e+9 or 1000000000, or shortcuts:'hs' for human (2.7e9), 'mm' for mouse (1.87e9), 'ce' for C. elegans (9e7) and 'dm' for fruitfly (1.2e8), Default:hs
   
   keepDup:   
-    type: File?
+    type: string
     inputBinding:
       position: 30
       prefix: --keep-dup
