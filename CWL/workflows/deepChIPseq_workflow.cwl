@@ -162,12 +162,107 @@ inputs:
   dummyCorrFile: File
 
 #-------------------------------------------------------------------
+#-------------------------------------------------------------------
 
+outputs: 
 
-outputs: []
+  # DEEPID.PROC.DATE.ASSM.raw.bamcov
+  - id: out1
+    type: File[]
+    outputSource: "#generateSignalCovTrack/outputFile"
 
-  #TODO
+  # DEEPID.PROC.DATE.ASSM.filt.bamcov
+  - id: out2
+    type: File[]
+    outputSource: "#generateCoverageForFilteredBam/outputFile"
 
+  # DEEPID.PROC.DATE.ASSM.ses.log2-Input
+  - id: out3
+    type: File[]
+    outputSource: TODO
+
+  # DEEPID.PROC.DATE.ASSM.cnt.log2-Input
+  - id: out4
+    type: File[]
+    outputSource: TODO
+
+  # DEEPID.PROC.DATE.ASSM.gcbias
+  - id: out5
+    type: File[]
+    outputSource: "#computeGCBias/outputFile"
+
+  # DEEPID.PROC.DATE.ASSM.gcfreq
+  - id: out6
+    type: File[]
+    outputSource: "#computeGCBias/outputFile"
+
+  # DEEPID.PROC.DATE.ASSM.hhmm.emfit 
+  - id: out7
+    type: File[]
+    outputSource: "#makeHistoneHMMBedLike/" TODO
+
+  # DEEPID.PROC.DATE.ASSM.hhmm.out
+  - id: out8
+    type: File[]
+    outputSource: "#histoneHMMN/" TOOD
+
+  # DEEPID.PROC.DATE.ASSM.macs.out
+  - id: out9
+    type: File[]
+    outputSource: "#histoneHMMB/" TODO
+
+  # DEEPID.PROC.DATE.ASSM.hhmm.broad
+  - id: out10
+    type: File[]
+    outputSource: "#peakCallOnFilteredBamN/outputBamFile"
+
+  # DEEPID.PROC.DATE.ASSM.macs.broad
+  - id: out11
+    type: File[]
+    outputSource: "#peakCallOnFilteredBamB/outputBamFile"
+
+  # DEEPID.PROC.DATE.ASSM.macs.narrow
+  - id: out12
+    type: File[]
+    outputSource: "#computeFingerprintForFilteredBam/outputFile" 
+
+  # DEEPID.PROC.DATE.ASSM.fgpr
+  - id: out13
+    type: File[]
+    outputSource: "#computeFingerprintForFilteredBam/outputFile"
+
+  # DEEPID.PROC.DATE.ASSM.qm-fgpr
+  - id: out14
+    type: File[]
+    outputSource: "#computeFingerprintForFilteredBam/outputFile"
+
+  # DEEPID.PROC.DATE.ASSM.counts-fgpr
+  - id: out15
+    type: File[]
+    outputSource: "#createDataMatrixForCorrelationPlot/outputFile"
+
+  # DEEPID.PROC.DATE.ASSM.auto.counts-summ
+  - id: out16
+    type: File[]
+    outputSource: "#createDataMatrixForCorrelationPlot/outputFile"
+
+  # DEEPID.PROC.DATE.ASSM.auto.summ
+  - id: out17
+    type: File[]
+    outputSource: "#createHeatmapCorrelationPlot/outputFile"
+
+  # DEEPID.PROC.DATE.ASSM.bamcorr
+  - id: out18
+    type: File[]
+    outputSource: "#createHeatmapCorrelationPlot/outputFile"
+
+  # DEEPID.PROC.DATE.ASSM.corrmat
+  - id: out19
+    type: File[]
+    outputSource: "#createHeatmapCorrelationPlot/outputFile"
+
+#-------------------------------------------------------------------
+#-------------------------------------------------------------------
 
 steps:
   
