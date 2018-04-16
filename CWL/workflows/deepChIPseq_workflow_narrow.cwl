@@ -1,11 +1,11 @@
-lVersion: v1.0
+cwlVersion: v1.0
 class: Workflow
 
-s:author:
-  - class: s:Person
-    s:identifier: https://orcid.org/0000-0002-5283-7633
-    s:email: mailto:heleneluessem@gmail.com
-    s:name: Helene Luessem
+#s:author:
+#  - class: s:Person
+#    s:identifier: https://orcid.org/0000-0002-5283-7633
+#    s:email: mailto:heleneluessem@gmail.com
+#    s:name: Helene Luessem
 
 requirements:
   - class: ScatterFeatureRequirement
@@ -16,45 +16,43 @@ inputs:
 
 #---------- Number of Processors------------------------------------
 
-  deeptoolsParallel: int
+  deeptoolsParallel_nWF: int
 
-  sambambaParallel : int
+  sambambaParallel_nWF : int
 
 
 #---------- Files and Prefixes -------------------------------------
 
   # Filtered bamfile GALvX_Histone
-  filteredBamFile: File
+  filteredBamFile_nWF: File
 
   # Filtered input bamfile: GALvX_Input
-  filteredBamFile_Input: File
+  filteredBamFile_Input_nWF: File
 
 
-  filePrefix: string
+  filePrefix_nWF: string
 
 
 #---------- Genome size --------------------------------------------
 
-  genomeSize: int
+  genomeSize_nWF: int
 
 
 #---------- Blacklist Regions --------------------------------------
 
-  blacklistRegions:
-    type: File
+  blacklistRegions_nWF: File
 
 
 #---------- Step 9: peakCallOnFilteredBam --------------------------
 
-  fragmentLength_peakCallOnFilteredBamN: int
-  fragmentLength_peakCallOnFilteredBamB: int
+  fragmentLength_peakCallOnFilteredBamN_nWF: int
 
 
 #-------------------------------------------------------------------
 #-------------------------------------------------------------------
 
 
-outputs:
+outputs: []
 
 
 #-------------------------------------------------------------------
@@ -70,9 +68,9 @@ steps:
     in:
       count:
         valueFrom: $( 1==1 )
-      inputFile: filteredBamFile
+      inputFile: filteredBamFile_nWF
       outputFileName:
-        valueFrom: $( filePrefix.map(function(e) {return e + ".mapped.readcount"})
+        valueFrom: $( filePrefix_nWF.map(function(e) {return e + ".mapped.readcount"})
 
     out:
       - outputBamFile
@@ -82,18 +80,17 @@ steps:
 
   generateCoverageForFilteredBam:
     run: ../tools/deepTools-tool-bamCoverage.cwl
-    scatter: [bam, outFileName]
     in:
-      numberOfProcessors: deeptoolsParallel
+      numberOfProcessors: deeptoolsParallel_nWF
       binSize:
         valueFrom: $( 25 )
-      bam: filteredBamFile
+      bam: filteredBamFile_nWF
       outFileName:
-        valueFrom: $( filePrefix.map(function(e) {return e + ".filt.bamcov"}) )
+        valueFrom: $( filePrefix_nWF.map(function(e) {return e + ".filt.bamcov"}) )
       outFileFormat:
         valueFrom:  bigwig
-      normalizeTo1x: genomeSize
-      blackListFileName: blacklistRegions
+      normalizeTo1x: genomeSize_nWF
+      blackListFileName: blacklistRegions_nWF
       ignoreForNormalization:
         valueFrom:  $( ["chrX", "chrY", "chrM", "X", "Y", "M", "MT"] )
 
@@ -105,17 +102,17 @@ steps:
   peakCallOnFilteredBamN:
     run: ../tools/bioconda-tool-macs2-callpeak.cwl
     in:
-      tFile: filteredBamFile
-      cFile: filteredBamFile_Input
+      tFile: filteredBamFile_nWF
+      cFile: filteredBamFile_Input_nWF
       format:
         valueFrom: BAM
-      gSize: genomeSize
+      gSize: genomeSize_nWF
       keepDup:
         valueFrom: $( "all" )
-      name: filePrefix
+      name: filePrefix_nWF
       noModel:
         valueFrom: $( 1==1 )
-      extSize: fragmentLength_peakCallOnFilteredBamN
+      extSize: fragmentLength_peakCallOnFilteredBamN_nWF
       qValue:
         valueFrom: $( 0.05 )
 
@@ -133,10 +130,10 @@ steps:
       inputFiles:
          valueFrom: $( [macsOut1, macsOut2, macsOut3] )
       outname:
-         valueFrom: $( filePrefix.map.map(function(e) {return e + ".macs.out"}) )
+         valueFrom: $( filePrefix_nWF.map.map(function(e) {return e + ".macs.out"}) )
 
-  out:
-   - outZipFile
+    out:
+      - outputZipFile
 
 
 #---------- Step 14: countReadsOverlappingPeakRegions --------------
@@ -146,11 +143,11 @@ steps:
     in:
       count: 
         valueFrom: $( 1==1 )
-      nThreads: sambambaParallel
-      regions: peakCallOnFilteredBamB/peakFile
-      inputFile: filteredBamFile
+      nThreads: sambambaParallel_nWF
+      regions: peakCallOnFilteredBamN/peakFile
+      inputFile: filteredBamFile_nWF
       outputFileName:
-        valueFrom: $( filePrefix.map(function(e) {return e + ".tmp.peak_ovl.cnt"}) )
+        valueFrom: $( filePrefix_nWF.map(function(e) {return e + ".tmp.peak_ovl.cnt"}) )
 
     out:
       - outputBamFile
@@ -160,16 +157,21 @@ steps:
 
   intersectPeakFiles:
     run: ../tools/bioconda-tool-bedtools-intersect.cwl
-    scatter: [fileA]
-    scatterMethod: dotproduct
     in:
       originalAOnce:
         valueFrom: $( 1==1 )
-      fileA: peakCallOnFilteredBamB/peakFile
-      fileB: blacklistRegions         
+      fileA: peakCallOnFilteredBamN/peakFile
+      fileB: blacklistRegions_nWF         
       outFileName:
-        valueFrom: $( filePrefix.map(function(e) {return e + ".peak-ovl-bl"}) )
+        valueFrom: $( filePrefix_nWF.map(function(e) {return e + ".peak-ovl-bl"}) )
 
     out:
       - outputFile
 
+
+$namespaces:
+  s: https://schema.org/
+  edam: http://edamontology.org/
+$schemas:
+  - https://schema.org/docs/schema_org_rdfa.html
+  - http://edamontology.org/EDAM_1.18.owl
