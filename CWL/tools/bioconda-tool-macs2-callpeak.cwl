@@ -34,8 +34,8 @@ outputs:
 
   extraFile:
     type: File
-      outputBinding:
-        glob: $(inputs.broad?"*_peaks.gappedPeak":"*_summits.bed")
+    outputBinding:
+      glob: $(inputs.broad?"*_peaks.gappedPeak":"*_summits.bed")
 
 inputs:
 
