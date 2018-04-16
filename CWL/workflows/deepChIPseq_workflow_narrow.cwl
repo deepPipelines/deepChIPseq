@@ -52,7 +52,17 @@ inputs:
 #-------------------------------------------------------------------
 
 
-outputs: []
+outputs:
+
+   # DEEPID.PROC.DATE.ASSM.filt.bamcov
+   - id: out_step1
+     type: File
+     outputSource: "#generateCoverageForFilteredBam/outputFile"
+
+  # DEEPID.PROC.DATE.ASSM.macs.out
+   - id: out9
+     type: File
+     outputSource: "#zipMacsFilesN/outputZipFile"
 
 
 #-------------------------------------------------------------------
@@ -122,7 +132,7 @@ steps:
       - extraFile
 
 
-#---------- Step 10: zipMacsFiles ----------------------------------
+#---------- Step 10: zipMacsFiles - narrow -------------------------
 
   zipMacsFilesN:
     run: ../tools/localfile-tool-zipMacsFiles.cwl
