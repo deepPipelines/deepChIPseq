@@ -32,7 +32,7 @@ inputs:
     type: File
     inputBinding:
       position: 10
-
+      prefix: --inputFile
 
   filter:
     type: string?
@@ -89,7 +89,7 @@ inputs:
       output to stdout only reference names and lengths in JSON
       
   regions:
-    type: File[]?
+    type: File?
     inputBinding:
       position: 15
       prefix: -L
