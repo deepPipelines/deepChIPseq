@@ -32,7 +32,6 @@ inputs:
     type: File
     inputBinding:
       position: 10
-      prefix: --inputFile
 
   filter:
     type: string?
