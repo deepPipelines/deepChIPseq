@@ -1,14 +1,19 @@
 #!/usr/bin/env cwl-runner
 
-cwlVersion: "v1.0"
-
 class: CommandLineTool
+
+cwlVersion: "v1.0"
 
 s:author:
   - class: s:Person
     s:identifier: https://orcid.org/0000-0001-6231-4417
     s:email: mailto:karl.nordstroem@uni-saarland.de
     s:name: Karl Nordström
+
+requirements:
+  - class: InlineJavascriptRequirement
+  - class: InitialWorkDirRequirement
+    listing: input
 
 hints:
   - class: ResourceRequirement
@@ -18,10 +23,8 @@ hints:
   - class: DockerRequirement
     dockerPull: "quay.io/biocontainers/bwa:0.6.2--1"
 
-requirements:
-  - class: InlineJavascriptRequirement
-
 inputs:
+
   input:
     type: File
     inputBinding:
@@ -29,7 +32,7 @@ inputs:
 
   algorithm:
     type: string?
-    description: |
+    doc: |
       BWT construction algorithm: bwtsw or is (Default: auto)
     inputBinding:
       position: 2
@@ -37,7 +40,7 @@ inputs:
 
   outPrefix:
     type: string?
-    description: |
+    doc: |
       Prefix of the index (Default: same as fasta name)
     inputBinding:
       position: 2
@@ -45,7 +48,7 @@ inputs:
 
   blockSize:
     type: int?
-    description: |
+    doc: |
       Block size for the bwtsw algorithm (effective with -a bwtsw) (Default: 10000000)
     inputBinding:
       position: 2
@@ -53,78 +56,88 @@ inputs:
 
   altSuffix:
     type: boolean?
-    description: |
+    doc: |
       Index files named as <in.fasta>.64.* instead of <in.fasta>.*
     inputBinding:
       position: 2
       prefix: "-6"
 
 outputs:
-  - id: output
-    type: { type: array, items: File }
-    outputBinding:
-      glob:
-          - ${
-              if (inputs.p) {
-                return inputs.p + ".amb"
-              } else {
-                if (inputs._6 == true) {
-                  return inputs.input.path + ".64.amb"
-                } else {
-                  return inputs.input.path + ".amb"
-                }
-              }
-            }
-          - ${
-              if (inputs.p) {
-                return inputs.p + ".ann"
-              } else {
-                if (inputs._6 == true) {
-                  return inputs.input.path + ".64.ann"
-                } else {
-                  return inputs.input.path + ".ann"
-                }
-              }
-            }
-          - ${
-              if (inputs.p) {
-                return inputs.p + ".bwt"
-              } else {
-                if (inputs._6 == true) {
-                  return inputs.input.path + ".64.bwt"
-                } else {
-                  return inputs.input.path + ".bwt"
-                }
-              }
-            }
-          - ${
-              if (inputs.p) {
-                return inputs.p + ".pac"
-              } else {
-                if (inputs._6 == true) {
-                  return inputs.input.path + ".64.pac"
-                } else {
-                  return inputs.input.path + ".pac"
-                }
-              }
-            }
-          - ${
-              if (inputs.p) {
-                return inputs.p + ".sa"
-              } else {
-                if (inputs._6 == true) {
-                  return inputs.input.path + ".64.sa"
-                } else {
-                  return inputs.input.path + ".sa"
-                }
-              }
-            }
+ # - id: output
+#  index:
+#    type: File
+#    outputBinding:
+#      glob: $( inputs.input )
+#    secondaryFiles: 
+#      - ".amb"
+#      - ".ann"
+#      - ".bwt"
+#      - ".pac"
+#      - ".sa"
+  #  type: { type: array, items: File }
+  #  outputBinding:
+  #    glob:
+  #        - ${
+  #            if (inputs.p) {
+  #              return inputs.p + ".amb"
+  #            } else {
+  #              if (inputs._6 == true) {
+  #                return inputs.input.path + ".64.amb"
+  #              } else {
+  #                return inputs.input.path + ".amb"
+  #              }
+  #            }
+  #          }
+  #        - ${
+  #            if (inputs.p) {
+  #              return inputs.p + ".ann"
+  #            } else {
+  #              if (inputs._6 == true) {
+  #                return inputs.input.path + ".64.ann"
+  #              } else {
+  #                return inputs.input.path + ".ann"
+  #              }
+  #            }
+  #          }
+  #        - ${
+  #            if (inputs.p) {
+  #              return inputs.p + ".bwt"
+  #            } else {
+  #              if (inputs._6 == true) {
+  #                return inputs.input.path + ".64.bwt"
+  #              } else {
+  #                return inputs.input.path + ".bwt"
+  #              }
+  #            }
+  #          }
+  #        - ${
+  #            if (inputs.p) {
+  #              return inputs.p + ".pac"
+  #            } else {
+  #              if (inputs._6 == true) {
+  #                return inputs.input.path + ".64.pac"
+  #              } else {
+  #                return inputs.input.path + ".pac"
+  #              }
+  #            }
+  #          }
+  #        - ${
+  #            if (inputs.p) {
+  #              return inputs.p + ".sa"
+  #            } else {
+  #             if (inputs._6 == true) {
+  #                return inputs.input.path + ".64.sa"
+  #              } else {
+  #                return inputs.input.path + ".sa"
+  #              }
+  #            }
+  #          }
 
 baseCommand:
   - bwa
   - index
 
-description: |
+doc: |
   Usage:   bwa index [options] <in.fasta>
 
   Options: -a STR    BWT construction algorithm: bwtsw or is [auto]
@@ -134,8 +147,6 @@ description: |
 
   Warning: `-a bwtsw' does not work for short genomes, while `-a is' and
            `-a div' do not work not for long genomes.
-
-
 
 $namespaces:
   s: https://schema.org/

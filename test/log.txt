@@ -1,0 +1,8 @@
+{
+    "QualityDistributionmetrics": null, 
+    "QualityByCyclemetricsTwo": null, 
+    "InsertSizemetrics": null, 
+    "AlignmentSummarymetrics": null, 
+    "QualityByCyclemetrics": null, 
+    "QualityDistributionmetricsTwo": null
+}

@@ -33,7 +33,13 @@ outputs:
 inputs:
 
   prefix:
-    type: string
+    type: File
+    secondaryFiles:
+      - ".amb"
+      - ".ann"
+      - ".bwt"
+      - ".pac"
+      - ".sa"
     doc: |
       reference prefix
     inputBinding:
@@ -84,7 +90,7 @@ inputs:
       prefix: "-e"
 
   minIndelEndDist:
-    type: int?]
+    type: int?
     doc: |
       do not put an indel within INT bp towards the ends [5]
     inputBinding:
@@ -138,8 +144,6 @@ inputs:
     inputBinding:
       position: 1
       prefix: "-q"
-
-
 
 doc: |
   Usage:   bwa aln [options] <prefix> <in.fq>
