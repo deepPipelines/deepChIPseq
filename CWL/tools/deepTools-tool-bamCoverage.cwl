@@ -1,8 +1,3 @@
-#!/usr/bin/env cwl-runner
-#This tool description was generated automatically by argparse2tool ver. 0.4.3-2
-# To generate again: $ bamCoverage --generate_cwl_tool
-# Help: $ bamCoverage --help_arg2cwl
-
 cwlVersion: "v1.0"
 
 class: CommandLineTool
@@ -42,9 +37,11 @@ inputs:
     doc: BAM file to process
     inputBinding:
       prefix: -b
+    secondaryFiles:
+      - ".bai"
 
   outFileName:
-    type: string
+    type: ["null", string]
 
     doc: Output file name.
     inputBinding:
