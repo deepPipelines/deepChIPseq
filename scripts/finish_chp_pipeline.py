@@ -14,10 +14,13 @@ import time as ti
 import operator as op
 
 
-__version__ = '0.1'
+__version__ = '0.1.1'
 __developer__ = 'Peter Ebert'
 __email__ = 'peter.ebert@iscb.org'
 __log_format__ = '%(asctime)s - %(levelname)s: %(message)s'
+
+
+__ITEM_SAMPLE_NAME__ = 'sample_name'
 
 
 def parse_command_line():
@@ -38,7 +41,6 @@ def parse_command_line():
     parser.add_argument('--output', '-o', type=str, required=True, dest='output',
                         help='Specify the full path to the metadata output file. If the path'
                              ' does not exist, it will be created.')
-
 
     args = parser.parse_args()
     return args
@@ -68,7 +70,8 @@ def prepare_section_inputs(args):
     :param args:
     :return:
     """
-    records = []
+    sample_name = __ITEM_SAMPLE_NAME__
+
     items_list = set()
     # define a list of accepted prefixes
     # for column names that refer to the same
@@ -79,7 +82,7 @@ def prepare_section_inputs(args):
     with open(args.sampletable, 'r') as tab:
         header = tab.readline().split('\t')
         for h in header:
-            if h in ['sample_label', 'filetype', 'filename']:
+            if h in [sample_name, 'filetype', 'filename']:
                 raw_colum.add(h)
                 items_list.add(h)
             else:
@@ -94,9 +97,9 @@ def prepare_section_inputs(args):
         rows = csv.DictReader(tab, delimiter='\t')
         for row in rows:
             subset = {k: row[k] for k in items_list}
-            label = subset['sample_label']
+            label = subset[sample_name]
             for k, v in subset.items():
-                if k == 'sample_label':
+                if k == sample_name:
                     continue
                 if k in raw_colum:
                     records[label].append(v)
@@ -129,7 +132,7 @@ def main():
     logger.debug('Preparing section: input files')
     sect_inputs = prepare_section_inputs(args)
 
-
+    return 0
 
 
 if __name__ == '__main__':
