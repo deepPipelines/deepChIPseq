@@ -1,11 +1,11 @@
 cwlVersion: v1.0
 class: Workflow
 
-s:author:
-  - class: s:Person
-    s:identifier: https://orcid.org/0000-0002-5283-7633
-    s:email: mailto:heleneluessem@gmail.com
-    s:name: Helene Luessem
+#s:author:
+#  - class: s:Person
+#    s:identifier: https://orcid.org/0000-0002-5283-7633
+#    s:email: mailto:heleneluessem@gmail.com
+#    s:name: Helene Luessem
 
 requirements:
   - class: ScatterFeatureRequirement
@@ -66,28 +66,32 @@ inputs:
 
 #---------- Step specific parameters -------------------------------
 
-#---------- Step 1: generateSignalCovTrack -------------------------
-#---------- Step 2: computeGCBias ----------------------------------
-#---------- Step 3: generateLog2FoldChangeTracks -------------------
-#---------- Step 4: computeFingerprintOnRawBam ---------------------
-#---------- Step 5: filterBamFiles ---------------------------------
-#---------- Step 6: countReadsInFilteredBam ------------------------
-#---------- Step 7: generateCoverageForFilteredBam -----------------
-#---------- Step 8: computeFingerprintForFilteredBam ---------------
-#---------- Step 9.1: peakCallOnFilteredBam - narrow ---------------
-#---------- Step 9.2: peakCallOnFilteredBam - broad- ---------------
-#---------- Step 10.1: zipMacsFiles - narrow -----------------------
-#---------- Step 10.2: zipMacsFiles - broad ------------------------
-#---------- Step 11: histoneHMM ------------------------------------
-#---------- Step 12: makeHistoneHMMBedLike -------------------------
-#---------- Step 13: zipSecHistoneHMMFiles -------------------------
-#---------- Step 14: countReadsOverlappingPeakRegions --------------
-#---------- Step 15: intersectPeakFiles ----------------------------
-#---------- Step 16: intersectHistoneHMMFiles ----------------------
-#---------- Step 17: flagAndStandardizePeaks -----------------------
-#---------- Step 18: restrictFilteredBAMstoAutosomalRegions --------
-#---------- Step 19: createDataMatrixForCorrelationPlot ------------
-#---------- Step 20: createHeatmapCorrelationPlot ------------------
+#---------- Step 1: generateSignalCovTrack -------------------------M
+#---------- Step 2: computeGCBias ----------------------------------M
+#---------- Step 3: generateLog2FoldChangeTracks -------------------M
+#---------- Step 4: computeFingerprintOnRawBam ---------------------M
+#---------- Step 5.1: filterBamFiles - narrow ----------------------M
+#---------- Step 5.2: filterBamFiles - broad -----------------------M
+#---------- Step 5.3: filterBamFiles - input -----------------------M
+#---------- Step 6: countReadsInFilteredBam ------------------------N
+#---------- Step 7: generateCoverageForFilteredBam -----------------N
+#---------- Step 8: computeFingerprintForFilteredBam ---------------M
+#---------- Step 9.1: peakCallOnFilteredBam - narrow ---------------N
+#---------- Step 9.2: peakCallOnFilteredBam - broad ----------------M
+#---------- Step 10.1: zipMacsFiles - narrow -----------------------N
+#---------- Step 10.2: zipMacsFiles - broad ------------------------M
+#---------- Step 11: histoneHMM ------------------------------------B
+#---------- Step 12: makeHistoneHMMBedLike -------------------------B
+#---------- Step 13: zipSecHistoneHMMFiles -------------------------B
+#---------- Step 14: countReadsOverlappingPeakRegions --------------N
+#---------- Step 15: intersectPeakFiles ----------------------------N
+#---------- Step 16: intersectHistoneHMMFiles ----------------------M
+#---------- Step 17: flagAndStandardizePeaks -----------------------M
+#---------- Step 18: restrictFilteredBAMstoAutosomalRegions --------M
+#---------- Step 19: createDataMatrixForCorrelationPlot ------------M
+#---------- Step 20: createHeatmapCorrelationPlot ------------------M
+
+#----------- Step 21: narrowWorkflow -------------------------------
 
 
 #---------- Step 2: computeGCBias ----------------------------------
@@ -129,8 +133,8 @@ inputs:
 
   prefix_peakCallOnFilteredBam: string
 
-  fragmentLength_peakCallOnFilteredBam: int[]
-
+  fragmentLength_peakCallOnFilteredBamN: int[]
+  fragmentLength_peakCallOnFilteredBamB: int[]
 
 #---------- Step 18: restrictFilteredBAMstoAutosomalRegions --------
 
@@ -171,7 +175,7 @@ outputs:
     type: File[]
     outputSource: "#generateSignalCovTrack/outputFile"
 
-  # DEEPID.PROC.DATE.ASSM.filt.bamcov
+# DEEPID.PROC.DATE.ASSM.filt.bamcov
   - id: out2
     type: File[]
     outputSource: "#generateCoverageForFilteredBam/outputFile"
@@ -201,7 +205,7 @@ outputs:
     type: File[]
     outputSource: "#histoneHMMN/" TOOD
 
-  # DEEPID.PROC.DATE.ASSM.macs.out
+# DEEPID.PROC.DATE.ASSM.macs.out
   - id: out9
     type: File[]
     outputSource: "#histoneHMMB/" TODO
@@ -366,9 +370,9 @@ steps:
       - outputFile
 
 
-#---------- Step 5: filterBamFiles ---------------------------------
+#---------- Step 5.1: filterBamFiles - narrow ----------------------
 
-  filterBamFiles:
+  filterBamFilesN:
     run: ../tools/bioconda-tool-sambamba-view.cwl
     scatter: [inputFile, outputFileName]
     scatterMethod: dotproduct
@@ -377,23 +381,66 @@ steps:
         valueFrom: bam 
       nThreads: sambambaParallel 
       outputFileName: 
-        valueFrom: $( input.narrowPrefix.concat(input.broadPrefix).concat(input.inputPrefix).map(function(e) {return e + ".tmp.filt.bam"}) )
+        valueFrom: $( input.narrowPrefix.map(function(e) {return e + ".tmp.filt.bam"}) )
       filter:
         valueFrom: $( "not (duplicate or unmapped or failed_quality_control or supplementary or secondary_alignment) and mapping_quality >= 5" )
-      inputFile: 
-        valueFrom: $(input.narrowBam.concat(input.broadBam).concat(input.inputBam))
+      inputFile: bamFilesRaw_Histone_narrow
 
       # ~Additional inputs~
       narrowBam: bamFilesRaw_Histone_narrow
-      broadBam: bamFilesRaw_Histone_broad
-      inputBam: bamFilesRaw_Input
       narrowPrefix: prefix_narrow
-      broadPrefix: prefix_broad
-      inputPrefix: prefix_input
 
     out:
       - outputBamFile
 
+
+#---------- Step 5.2: filterBamFiles - broad -----------------------
+
+  filterBamFilesB:
+    run: ../tools/bioconda-tool-sambamba-view.cwl
+    scatter: [inputFile, outputFileName]
+    scatterMethod: dotproduct
+    in:
+      format:
+        valueFrom: bam
+      nThreads: sambambaParallel
+      outputFileName:
+        valueFrom: $( input.broadPrefix.map(function(e) {return e + ".tmp.filt.bam"}) )
+      filter:
+        valueFrom: $( "not (duplicate or unmapped or failed_quality_control or supplementary or secondary_alignment) and mapping_quality >= 5" )
+      inputFile: bamFilesRaw_Histone_broad
+
+      # ~Additional inputs~
+      broadBam: bamFilesRaw_Histone_broad
+      broadPrefix: prefix_broad
+
+    out:
+      - outputBamFile
+      
+
+#---------- Step 5.3: filterBamFiles - input -----------------------
+
+  filterBamFilesI:
+    run: ../tools/bioconda-tool-sambamba-view.cwl
+    scatter: [inputFile, outputFileName]
+    scatterMethod: dotproduct
+    in:
+      format:
+        valueFrom: bam
+      nThreads: sambambaParallel
+      outputFileName:
+        valueFrom: $( input.imputPrefix.map(function(e) {return e + ".tmp.filt.bam"}) )
+      filter:
+        valueFrom: $( "not (duplicate or unmapped or failed_quality_control or supplementary or secondary_alignment) and mapping_quality >= 5" )
+      inputFile: bamFilesRaw_Histone_Input
+
+     # ~Additional inputs~
+      inputBam: bamFilesRaw_Input
+      inputPrefix: prefix_input
+
+    out:
+      - outputBamFile
+      
 
 #---------- Step 8: computeFingerprintForFilteredBam ---------------
 
@@ -460,40 +507,6 @@ steps:
 
     out:
       - outputBamFile
-
-
-
-#---------- Step 11: histoneHMM ------------------------------------
-# TODO: Missing
-
-
-#---------- Step 12: makeHistoneHMMBedLike -------------------------
-# TODO: Missing
-
-
-#---------- Step 13: zipSecHistoneHMMFiles -------------------------
-# TODO: Missing
-
-
-#---------- Step 16: intersectHistoneHMMFiles ----------------------
-
-  intersectHistoneHMMFiles:
-    run: ../tools/bioconda-tool-bedtools-intersect.cwl
-#    scatter: [fileA]
-#    scatterMethod: dotproduct
-    in:
-      originalAOnce:
-        valueFrom: $( 1==1 )
-      fileA:
-        valueFrom: dummyFileA    # TODO: Which file? 
-      fileB:
-        valueFrom: dummyFileB    # TODO: Which file?
-#      outFileName: TODO: Which name?
- 
-      # ~Additional inputs~
-      # TODO
-    out:
-      - outputFile
 
 
 #---------- Step 17: flagAndStandardizePeaks -----------------------
@@ -581,6 +594,23 @@ steps:
     out:
       - outputFile
 
+#---------- Step 21: narrowWorkflow --------------------------------
+
+  narrowWorkflow:
+    run: deepChIPseq_workflow_narrow.cwl
+    scatter: [filteredBamFile_nWF, filePrefix_nWF, fragmentLength_peakCallOnFilteredBamN_nWF]
+    scatterMethod: dotproduct
+    in:
+      deeptoolsParallel_nWF: deeptoolsParallel
+      sambambaParallel_nWF: sambambaParallel
+      filteredBamFile_nWF: filterBamFilesN/outputBamFile
+      filePrefix_nWF: prefix_narrow
+      genomeSize_nWF: genomeSize
+      blacklistRegions_nWF: blacklistRegions
+      fragmentLength_peakCallOnFilteredBamN_nWF: fragmentLength_peakCallOnFilteredBamN
+    
+    out:
+      []
 
 $namespaces:
   s: https://schema.org/
@@ -589,21 +619,3 @@ $namespaces:
 $schemas:
   - https://schema.org/docs/schema_org_rdfa.html
   - http://edamontology.org/EDAM_1.18.owl
-
-
-
-#      # ~Additional Inputs~
-#       proxy1:
-#         valueFrom: $( inputs.narrowPeaks.concat(inputs.broadPeaks) )
-#       proxy2:
-#         valueFrom: $(
-#      narrowPrefix: prefix_narrow
-#       narrowPeaks:
-#       narrowTable:
-#       narrowSummits:
-
-#       broadPrefix: prefix_broad
-#       broadPeaks:
-#       broadTable:
-#       broadGapped
-
