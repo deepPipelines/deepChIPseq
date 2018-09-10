@@ -1,0 +1,31 @@
+
+deeptoolsParallel: 10
+sambambaParallel: 10
+
+bamFilesRaw_Histone_narrow: [
+  {class: File, path: testfiles/test_fraction1.bam},
+  {class: File, path: testfiles/test_fraction2.bam}
+]
+
+bamFilesRaw_Histone_broad: [
+  {class: File, path: testfiles/test_fraction2.bam},
+  {class: File, path: testfiles/test_fraction3.bam}
+]
+
+bamFilesRaw_Input:
+  class: File
+  path: testfiles/test_fraction1.bam
+
+prefix_narrow: ["20134.NARROW.20180903.001", "20134.NARROW.20180903.002"]
+
+prefix_broad: ["20134.BROAD.20180903.050", "20134.BROAD.20180903.051"]
+
+prefix_input: "20134.INPUT.20180903.100"
+
+filePrefix: "20134.FILE.20180903.150"
+
+genomeSize: 300000
+
+genome: testfiles/test_fraction2.bam
+
+fragmentLength_computeGCBias: [200, 300, 400, 500, 250]
